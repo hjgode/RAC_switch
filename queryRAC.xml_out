@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DevInfo Action="GetResp">
+	<Subsystem Name="Reliable Access Client">
+		<Group Name="Profile" Instance="SUPPORT">
+			<Field Name="disabled">1</Field>
+		</Group>
+	</Subsystem>
+</DevInfo>
