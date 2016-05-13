@@ -108,7 +108,11 @@ namespace RAC_switch
                 System.Diagnostics.Debug.WriteLine(a.ToString()); // 169.254.2.1, 127.0.0.1
                 if (a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 {
+#if DEBUG
+                    if (a.ToString() != "127.0.0.1")
+#else
                     if (a.ToString() != "169.254.2.1" && a.ToString() != "127.0.0.1")
+#endif
                     {
                         bLocalsOnly = false;
                         _currentIP = a;
