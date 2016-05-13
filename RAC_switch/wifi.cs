@@ -87,10 +87,10 @@ namespace RAC_switch
         {
             get
             {
-                return _ssAPI.racProfiles;
+                return _ssAPI._racProfiles;
             }
         }
-
+        
         public void UpdateAdapters()
         {
             // Get the available adapters

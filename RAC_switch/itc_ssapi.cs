@@ -13,6 +13,7 @@ namespace RAC_switch
     {
         static ITCSSApi _ssAPI = null;
 
+        #region XML_STUFF
         //there is no possible query to query all existing profile via XML
         //use the registry instead:
         //[HKEY_LOCAL_MACHINE\Software\wpa_supplicant\configs\Intermec\networks]
@@ -49,6 +50,10 @@ namespace RAC_switch
           </Subsystem>
          </DevInfo>
         */
+        #endregion
+
+        public List<racProfile> _racProfiles = new List<racProfile>();
+
         const string queryRACxml = "<Subsystem Name=\"Reliable Access Client\">";
 
         const string setRACprofileXml =
@@ -62,10 +67,23 @@ namespace RAC_switch
         {
             if (_ssAPI == null)
                 _ssAPI = new ITCSSApi();
-
+            _racProfiles = listRACprofiles();
         }
 
-        public List<racProfile> racProfiles = new List<racProfile>();
+        public racProfile getCurrentProfile()
+        {
+            racProfile racP = new racProfile("Default", "Default", "", "disabled");
+            foreach (racProfile r in _racProfiles)
+            {
+                if (r.bDisabled == false)
+                {
+                    racP=r ;
+                    break;
+                }
+            }
+            return racP;
+        }
+
         public class racProfile
         {
             string _regKey;
@@ -86,7 +104,16 @@ namespace RAC_switch
             {
                 get { return _disabled; }
             }
-            
+            public bool bDisabled
+            {
+                get
+                {
+                    if (sDisabled == "0")
+                        return false;
+                    else
+                        return true;
+                }
+            }
             public racProfile(string profileRegKey, string profilelabel, string ssid, string disabled)
             {
                 _regKey = profileRegKey;
@@ -102,9 +129,10 @@ namespace RAC_switch
                        "/ sDisabled :" + _disabled;
             }
         }
+
         public List<racProfile> listRACprofiles()
         {
-            racProfiles.Clear();
+            _racProfiles.Clear();
             List<string> lRet = new List<string>();
             //RegistryKey rKey = Registry.LocalMachine.OpenSubKey(@"Software\wpa_supplicant\configs\Intermec\networks",false);
             const string subKey = @"HKEY_LOCAL_MACHINE\\Software\wpa_supplicant\configs\Intermec\networks";
@@ -125,7 +153,7 @@ namespace RAC_switch
 
                         racProfile racProf = new racProfile(sProfileSubKey, sLabel, sSSID, sDisabled);
                         Logger.WriteLine("listRACprofiles found: " + racProf.ToString());
-                        racProfiles.Add(racProf);
+                        _racProfiles.Add(racProf);
                     }
                 }
                 catch (Exception ex)
@@ -133,7 +161,7 @@ namespace RAC_switch
                     Logger.WriteLine("Exception in listRACprofiles read networks. " + ex.Message);
                 }
             }
-            return racProfiles;
+            return _racProfiles;
         }
 
         /// <summary>
@@ -149,7 +177,7 @@ namespace RAC_switch
             StringBuilder sb = new StringBuilder(1024);
             //find profile with ssid
             string profile = "";
-            foreach (racProfile rac in racProfiles)
+            foreach (racProfile rac in _racProfiles)
             {
                 if (rac.sProfileLabel == "Default")
                     continue; //next iteration
@@ -171,7 +199,7 @@ namespace RAC_switch
             return iRet;
         }
 
-        int enableProfile(string profilelabel, bool bEnable)
+        public int enableProfile(string profilelabel, bool bEnable)
         {
             Logger.WriteLine("enableProfile: " + profilelabel + "/" + bEnable);
             int iRet = 0;
