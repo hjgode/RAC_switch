@@ -13,17 +13,38 @@ namespace RAC_switch
         /// list of profile in order of priority!
         /// </summary>
         string[] _profiles;
+        object syncObject = new object();
+        bool bInsideSwitch = false;
+
         bool _bStopThread = false;
         Thread _workThread=null;
         Thread _connectThread = null;
         Thread _timerThread = null;
-        PowerMessages _powerMessages = null;
+        //PowerMessages _powerMessages = null;
+        PowerSourceChanges _PowerSourceMessages = null;
+        PowerMessages _PowerMessages = null;
 
         itc_ssapi _ssRACapi;
+
+        #region EVENTS
+        /// <summary>
+        /// event signaled periodically, used by
+        /// </summary>
+        EventWaitHandle evtTime = new EventWaitHandle(false, EventResetMode.AutoReset, "evtTime");
+        EventWaitHandle evtDisconnect = new EventWaitHandle(false, EventResetMode.AutoReset, "evtDisconnect");
+        EventWaitHandle evtPower = new EventWaitHandle(false, EventResetMode.AutoReset, "evtPower");
+        EventWaitHandle evtUndocked = new EventWaitHandle(false, EventResetMode.AutoReset, "evtUndocked");
+        /// <summary>
+        /// even to stop all threads. Manually reset event!
+        /// </summary>
+        EventWaitHandle evtStopThreads = new EventWaitHandle(false, EventResetMode.ManualReset, "evtStopThreads");
+        #endregion
 
         public connector(string[] profiles)
         {
             _profiles = profiles;
+            evtStopThreads.Reset(); // clear event
+
             OnConnecterMessage("connector initialized with profiles: ");
             try
             {
@@ -48,14 +69,24 @@ namespace RAC_switch
             _timerThread.Name = "timerThread";
             _timerThread.Start();
 
-            _powerMessages = new PowerMessages();
-            _powerMessages.powerChangedEvent += new PowerMessages.powerChangeEventHandler(_powerMessages_powerChangedEvent);
+            _PowerSourceMessages = new PowerSourceChanges();
+            _PowerSourceMessages.powerChangedEvent += new PowerSourceChanges.powerChangeEventHandler(_powerSourceMessages_powerChangedEvent);
+
+            _PowerMessages = new PowerMessages();
+            _PowerMessages.powerChangedEvent += new PowerMessages.powerChangeEventHandler(_PowerMessages_powerChangedEvent);
         }
 
-        void _powerMessages_powerChangedEvent(object sender, PowerMessages.PowerEventArgs args)
+        void _PowerMessages_powerChangedEvent(object sender, PowerMessages.PowerEventArgs args)
         {
             if(args.powerOn)
-                evtPower.Set();
+                evtPower.Set();            
+        }
+
+
+        void _powerSourceMessages_powerChangedEvent(object sender, PowerSourceChanges.PowerEventArgs args)
+        {
+            if(!(args.docked))
+                evtUndocked.Set();            
         }
 
         public void Dispose()
@@ -71,11 +102,29 @@ namespace RAC_switch
                     _connectThread.Abort();
                 if (_timerThread != null)
                     _timerThread.Abort();
+                if (_PowerSourceMessages != null)
+                    _PowerSourceMessages.Dispose();
             }
         }
 
+        public void trySwitch()
+        {
+            doSwitch();
+        }
+
+        /// <summary>
+        /// this function tries to switch to the preferred network
+        /// </summary>
         void doSwitch()
         {
+            if (bInsideSwitch)
+            {
+                Logger.WriteLine("doSwitch called although already insideSwitch");
+                return;
+            }
+            lock (syncObject)
+                bInsideSwitch=true;
+
             int iConnectTry = 0;
             //is first profile active?
             string currentProfile = _ssRACapi.getCurrentProfile().sProfileLabel;
@@ -106,9 +155,10 @@ namespace RAC_switch
                 _ssRACapi.enableProfile(_profiles[1], false); //disable second profile
                 _ssRACapi.enableProfile(_profiles[0], true); //enable first profile
                 iConnectTry = 0;
-                while (!_bStopThread && iConnectTry < 10)
+                //try for 40 seconds or so
+                while (!_bStopThread && iConnectTry < 30)
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(1000);
                     iConnectTry++;
                     if (network._getConnected() == true)
                         break;
@@ -129,13 +179,24 @@ namespace RAC_switch
             {
                 OnConnecterMessage("Current profile not in list!");
             }
+
+            lock (syncObject)
+                bInsideSwitch = false;
         }
 
+        /// <summary>
+        /// main worker thread
+        /// can be 'released' by
+        ///  timer event
+        ///  stop event
+        ///  disconnect event
+        ///  power event
+        ///  dock event
+        /// end then calls other functions
+        /// </summary>
         void myWorkerThread()
         {
             OnConnecterMessage("myWorkerThread start");
-            int iDelay = 0;
-            int iConnectTry=0;
             batterylog2.BatteryStatusEx batteryStatus=new batterylog2.BatteryStatusEx();
             bool isDocked = batteryStatus._isACpowered;
             bool stopp = false;
@@ -154,18 +215,22 @@ namespace RAC_switch
                             _bStopThread = true;
                             break;
                         case 1: //timer
+                            OnConnecterMessage("myWorkerThread timer signaled");
                             break;
                         case 2: //disconnect
+                            OnConnecterMessage("myWorkerThread disconnect signaled");
                             //try primary profile
                             //try secondary profile
                             doSwitch();
                             break;
                         case 3: //PowerOn
+                            OnConnecterMessage("myWorkerThread powerOn signaled");
                             //try primary profile
                             //try secondary profile
                             doSwitch();
                             break;
                         case 4: //undocked
+                            OnConnecterMessage("myWorkerThread undocked signaled");
                             //try primary profile
                             //try secondary profile
                             doSwitch();
@@ -173,6 +238,7 @@ namespace RAC_switch
                         case EventWaitHandle.WAIT_FAILED:
                             break;
                         case EventWaitHandle.WAIT_TIMEOUT:
+                            //OnConnecterMessage("myWorkerThread WAIT_TIMEOUT");
                             break;
                     }
                 } while (!stopp);
@@ -188,6 +254,10 @@ namespace RAC_switch
             OnConnecterMessage("myWorkerThread ended");
         }
 
+        /// <summary>
+        /// this thread checks for an existing connection
+        /// will fire disconnect event on disconnect
+        /// </summary>
         void connectWatchThread()
         {
             OnConnecterMessage("connectWatchThread starting");
@@ -195,11 +265,19 @@ namespace RAC_switch
             WaitHandle[] handles = new WaitHandle[] { evtStopThreads };
             int indx = -1;
             bool stopp=false;
+            bool bRadioPower = false;
+            string associatedAP = "";
+            bool bDoNotCheck=false;
+
             try
             {
                 do
                 {
-                    indx = EventWaitHandle.WaitAny(handles, 5000, false);
+#if DEBUG
+                    indx = EventWaitHandle.WaitAny(handles, 20000, false);
+#else
+                    indx = EventWaitHandle.WaitAny(handles, 60000, false);
+#endif
                     switch (indx)
                     {
                         case 0:
@@ -207,11 +285,32 @@ namespace RAC_switch
                             OnConnecterMessage("connectWatchThread stopp signaled");
                             break;
                         case EventWaitHandle.WAIT_TIMEOUT:
-                            OnConnecterMessage("connectWatchThread WAIT_TIMEOUT");
+                            lock (syncObject)
+                            {
+                                bDoNotCheck = bInsideSwitch;
+                            }
+                            if (bDoNotCheck)
+                            {
+                                OnConnecterMessage("connectWatchThread does not check!");
+                                break;
+                            }
+                            //OnConnecterMessage("connectWatchThread WAIT_TIMEOUT");
+                            bRadioPower = _ssRACapi.getRadioEnabled();
+                            if (!bRadioPower){
+                                OnConnecterMessage("Radio is disabled!");
+                                break;
+                            }
+                            associatedAP=wifi.getAssociatedAP();
+                            OnConnecterMessage("connectWatchThread: associatedAP AP=" + associatedAP);
+                            if (associatedAP == this._ssRACapi._racProfiles[0].sSSID)
+                            {
+                                OnConnecterMessage("connectWatchThread: Radio already connected to preferred profile " + _ssRACapi._racProfiles[0].sProfileLabel);
+                                break;
+                            }
                             newState = network._getConnected();
                             if (!newState)
                             {
-                                OnConnecterMessage("connectWatchThread fires Disconnect event");
+                                OnConnecterMessage("connectWatchThread: fire Disconnect event");
                                 //fire event
                                 evtDisconnect.Set();
                             }
@@ -232,7 +331,7 @@ namespace RAC_switch
         }
 
         /// <summary>
-        /// fire timer event periodically
+        /// fires timer event periodically
         /// </summary>
         void timerThread()
         {
@@ -244,7 +343,7 @@ namespace RAC_switch
             {
                 do
                 {
-                    indx = EventWaitHandle.WaitAny(handles, 5000, false);
+                    indx = EventWaitHandle.WaitAny(handles, 30000, false);
                     switch (indx)
                     {
                         case 0:
@@ -273,20 +372,6 @@ namespace RAC_switch
             }
             OnConnecterMessage("timerThread ended");
         }
-
-        #region EVENTS
-        /// <summary>
-        /// event to let all waiting threads run one loop. Must be reset manually!
-        /// </summary>
-        EventWaitHandle evtTime = new EventWaitHandle(false, EventResetMode.AutoReset, "evtTime");
-        EventWaitHandle evtDisconnect = new EventWaitHandle(false, EventResetMode.AutoReset, "evtDisconnect");
-        EventWaitHandle evtPower = new EventWaitHandle(false, EventResetMode.AutoReset, "evtPower");
-        EventWaitHandle evtUndocked = new EventWaitHandle(false, EventResetMode.AutoReset, "evtUndocked");
-        /// <summary>
-        /// even to stop all threads. Manually reset event!
-        /// </summary>
-        EventWaitHandle evtStopThreads = new EventWaitHandle(false, EventResetMode.ManualReset, "evtStopThreads");
-        #endregion
 
         #region EvenHandling
         public delegate void connectorChangeEventHandler(object sender, ConnectorEventArgs args);

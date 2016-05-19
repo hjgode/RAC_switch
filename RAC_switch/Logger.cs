@@ -21,7 +21,7 @@ namespace RAC_switch
                         sw.WriteLine(DateTime.Now.ToShortTimeString() + "\t" + s);
                     }
                 }catch(Exception ex){
-                    System.Diagnostics.Debug.WriteLine("RAC_switch: " + s);
+                    System.Diagnostics.Debug.WriteLine("RAC_switch Exception: " + s + "\r\n" +ex.Message);
                 }
             }
         }

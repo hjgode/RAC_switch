@@ -52,22 +52,96 @@ namespace RAC_switch
         */
         #endregion
 
-        public List<racProfile> _racProfiles = new List<racProfile>();
+        private List<racProfile> _myRacProfiles = new List<racProfile>();
+        public List<racProfile> _racProfiles
+        {
+            get
+            {
+                listRACprofiles(); //read current list, updates _myRacProfiles
+                return _myRacProfiles;
+            }
+            set
+            {
+                _myRacProfiles = value;
+            }
+        }
 
         const string queryRACxml = "<Subsystem Name=\"Reliable Access Client\">";
 
         const string setRACprofileXml =
             "<Subsystem Name=\"Reliable Access Client\">\r\n" +
             "  <Group Name=\"Profile\" Instance=\"{0}\">\r\n" + //put Profile Name for {0}, ie "Profile_1"
-            "    <Field Name=\"disabled\">{1}</Field>\r\n" +    //put 1 for enabled or 0 for disabled!
+            "    <Field Name=\"disabled\">{1}</Field>\r\n" +    //put 1 for enabled or 0 for disabled, the 'disabled' has to be read as 'enabled'!
             "  </Group>\r\n" +
             "</Subsystem>";
+
+        const string getRadioEnabledXml =
+            "<Subsystem Name=\"Communications\"> \r\n" +
+            " <Group Name=\"802.11 Radio\"> \r\n" +
+            "     <Field Name=\"Radio Enabled\">1</Field>  \r\n" +
+            " </Group> \r\n" +
+            "</Subsystem> \r\n";
+        const string setRadioEnabledXml =
+            "<Subsystem Name=\"Communications\"> \r\n" +
+            " <Group Name=\"802.11 Radio\"> \r\n" +
+            "     <Field Name=\"Radio Enabled\">{0}</Field>  \r\n" +
+            " </Group> \r\n" +
+            "</Subsystem> \r\n";
 
         public itc_ssapi()
         {
             if (_ssAPI == null)
                 _ssAPI = new ITCSSApi();
-            _racProfiles = listRACprofiles();
+            //_racProfiles = listRACprofiles();
+        }
+
+        public bool getRadioEnabled()
+        {
+            bool bRet = false;
+            Logger.WriteLine("getRadioEnabled...");
+            int iRet = 0;
+            StringBuilder sb = new StringBuilder(1024);
+            int dSize = 1024;
+            string sXML = getRadioEnabledXml;
+            Logger.WriteLine(sXML);
+            uint uError = _ssAPI.Get(sXML, sb, ref dSize, 2000);
+            if (uError != ITCSSErrors.E_SS_SUCCESS)
+            {
+                Logger.WriteLine("SSAPI error: " + uError.ToString() + "\n" + sb.ToString().Substring(0, dSize));
+                iRet = -1;
+            }
+            else
+            {
+                Logger.WriteLine("getRadioEnabled success");
+                string sTest = sb.ToString().Substring(sb.ToString().IndexOf("<Field Name=\"Radio Enabled\">") + "<Field Name=\"Radio Enabled\">".Length, 1);
+                Logger.WriteLine("getRadioEnabled success: sTest="+sTest);
+                if (sTest == "1")
+                    bRet = true;
+                else
+                    bRet = false;
+                iRet = 0;
+            }
+            return bRet;
+        }
+        public int setRadioEnabled(bool bEnable){
+            Logger.WriteLine("setRadioEnabled: " + bEnable);
+            int iRet = 0;
+            StringBuilder sb = new StringBuilder(1024);
+            int dSize = 1024;
+            string sXML = String.Format(setRadioEnabledXml, (bEnable ? 1 : 0)); 
+            Logger.WriteLine(sXML);
+            uint uError = _ssAPI.Set(sXML, sb, ref dSize, 2000);
+            if (uError != ITCSSErrors.E_SS_SUCCESS)
+            {
+                Logger.WriteLine("SSAPI error: " + uError.ToString() + "\n" + sb.ToString().Substring(0, dSize));
+                iRet = -1;
+            }
+            else
+            {
+                Logger.WriteLine("setRadioEnabled success");
+                iRet = 0;
+            }
+            return iRet;
         }
 
         public racProfile getCurrentProfile()
@@ -75,7 +149,7 @@ namespace RAC_switch
             racProfile racP = new racProfile("Default", "Default", "", "disabled");
             foreach (racProfile r in _racProfiles)
             {
-                if (r.bDisabled == false)
+                if (r.bEnabled == true)
                 {
                     racP=r ;
                     break;
@@ -89,7 +163,7 @@ namespace RAC_switch
             string _regKey;
             string _profileLabel;
             string _ssid;
-            string _disabled;
+            string _enabled;
             
             public string sProfileRekKey{
                 get { return _regKey; }
@@ -100,15 +174,15 @@ namespace RAC_switch
             public string sSSID{
                 get {return _ssid;}
             }
-            public string sDisabled
+            public string sEnabled
             {
-                get { return _disabled; }
+                get { return _enabled; }
             }
-            public bool bDisabled
+            public bool bEnabled
             {
                 get
                 {
-                    if (sDisabled == "0")
+                    if (sEnabled == "0")
                         return false;
                     else
                         return true;
@@ -119,20 +193,23 @@ namespace RAC_switch
                 _regKey = profileRegKey;
                 _profileLabel = profilelabel;
                 _ssid = ssid;
-                _disabled = disabled;
+                if (disabled == "0")
+                    _enabled = "1";
+                else
+                    _enabled = "0";
             }
             public override string ToString()
             {
                 return "sProfileRekKey: " + _regKey +
                        "/ sProfileLabel :" + _profileLabel +
                        "/ sSSID :" + _ssid + 
-                       "/ sDisabled :" + _disabled;
+                       "/ sEnabled :" + _enabled;
             }
         }
 
         public List<racProfile> listRACprofiles()
         {
-            _racProfiles.Clear();
+            _myRacProfiles.Clear();
             List<string> lRet = new List<string>();
             //RegistryKey rKey = Registry.LocalMachine.OpenSubKey(@"Software\wpa_supplicant\configs\Intermec\networks",false);
             const string subKey = @"HKEY_LOCAL_MACHINE\\Software\wpa_supplicant\configs\Intermec\networks";
@@ -149,11 +226,13 @@ namespace RAC_switch
                         string sLabel = (string)Registry.GetValue(subKey +"\\" + sProfileSubKey, "ProfileName", "");
                         string sSSID = (string)Registry.GetValue(subKey + "\\" + sProfileSubKey, "ssid", "");
                         sSSID = sSSID.Trim(new char[] { '"' });
+
+                        //the registry holds a disbaled value whereas the xml holds an enabled value
                         string sDisabled = (string)Registry.GetValue(subKey + "\\" + sProfileSubKey, "disabled", "");
 
                         racProfile racProf = new racProfile(sProfileSubKey, sLabel, sSSID, sDisabled);
                         Logger.WriteLine("listRACprofiles found: " + racProf.ToString());
-                        _racProfiles.Add(racProf);
+                        _myRacProfiles.Add(racProf);
                     }
                 }
                 catch (Exception ex)
@@ -161,7 +240,7 @@ namespace RAC_switch
                     Logger.WriteLine("Exception in listRACprofiles read networks. " + ex.Message);
                 }
             }
-            return _racProfiles;
+            return _myRacProfiles;
         }
 
         /// <summary>
@@ -195,7 +274,7 @@ namespace RAC_switch
             }
             if (profile == "")
                 return -2;
-            listRACprofiles();
+            //listRACprofiles();
             return iRet;
         }
 
@@ -205,7 +284,7 @@ namespace RAC_switch
             int iRet = 0;
             StringBuilder sb = new StringBuilder(1024);
             int dSize = 1024;
-            string sXML = String.Format(setRACprofileXml, profilelabel, (bEnable?1:0) ); //enable = 1, disabled=0 !!!
+            string sXML = String.Format(setRACprofileXml, profilelabel, (bEnable?1:0) ); //enable = 1, disabled=0, the xml say disabled instead of enabled !!!
             Logger.WriteLine(sXML);
             uint uError = _ssAPI.Set(sXML, sb, ref dSize, 2000);
             if (uError != ITCSSErrors.E_SS_SUCCESS)

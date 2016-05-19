@@ -36,16 +36,28 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.dataGrid1 = new System.Windows.Forms.DataGrid();
             this.dataGrid2 = new System.Windows.Forms.DataGrid();
+            this.dataGrid1 = new System.Windows.Forms.DataGrid();
+            this.btnTrySwitch = new System.Windows.Forms.Button();
+            this.btnStart = new System.Windows.Forms.Button();
+            this.btnStop = new System.Windows.Forms.Button();
+            this.menuItem1 = new System.Windows.Forms.MenuItem();
+            this.mnuExit = new System.Windows.Forms.MenuItem();
+            this.menuItem2 = new System.Windows.Forms.MenuItem();
+            this.mnuGetProfiles = new System.Windows.Forms.MenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
+            // mainMenu1
+            // 
+            this.mainMenu1.MenuItems.Add(this.menuItem1);
+            this.mainMenu1.MenuItems.Add(this.menuItem2);
+            // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(21, 16);
+            this.button1.Location = new System.Drawing.Point(7, 7);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(80, 30);
             this.button1.TabIndex = 0;
@@ -54,7 +66,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(140, 16);
+            this.button2.Location = new System.Drawing.Point(93, 7);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(80, 30);
             this.button2.TabIndex = 0;
@@ -85,6 +97,9 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.SystemColors.InactiveBorder;
+            this.tabPage1.Controls.Add(this.btnStop);
+            this.tabPage1.Controls.Add(this.btnStart);
+            this.tabPage1.Controls.Add(this.btnTrySwitch);
             this.tabPage1.Controls.Add(this.button1);
             this.tabPage1.Controls.Add(this.txtLog);
             this.tabPage1.Controls.Add(this.button2);
@@ -99,24 +114,70 @@
             this.tabPage2.Controls.Add(this.dataGrid1);
             this.tabPage2.Location = new System.Drawing.Point(0, 0);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(235, 223);
+            this.tabPage2.Size = new System.Drawing.Size(240, 245);
             this.tabPage2.Text = "info";
+            // 
+            // dataGrid2
+            // 
+            this.dataGrid2.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.dataGrid2.Location = new System.Drawing.Point(7, 142);
+            this.dataGrid2.Name = "dataGrid2";
+            this.dataGrid2.Size = new System.Drawing.Size(226, 100);
+            this.dataGrid2.TabIndex = 5;
             // 
             // dataGrid1
             // 
             this.dataGrid1.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
             this.dataGrid1.Location = new System.Drawing.Point(7, 7);
             this.dataGrid1.Name = "dataGrid1";
-            this.dataGrid1.Size = new System.Drawing.Size(185, 67);
+            this.dataGrid1.Size = new System.Drawing.Size(226, 93);
             this.dataGrid1.TabIndex = 4;
             // 
-            // dataGrid2
+            // btnTrySwitch
             // 
-            this.dataGrid2.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.dataGrid2.Location = new System.Drawing.Point(7, 80);
-            this.dataGrid2.Name = "dataGrid2";
-            this.dataGrid2.Size = new System.Drawing.Size(185, 63);
-            this.dataGrid2.TabIndex = 5;
+            this.btnTrySwitch.Location = new System.Drawing.Point(154, 59);
+            this.btnTrySwitch.Name = "btnTrySwitch";
+            this.btnTrySwitch.Size = new System.Drawing.Size(79, 28);
+            this.btnTrySwitch.TabIndex = 2;
+            this.btnTrySwitch.Text = "try switch";
+            this.btnTrySwitch.Click += new System.EventHandler(this.btnTrySwitch_Click);
+            // 
+            // btnStart
+            // 
+            this.btnStart.Location = new System.Drawing.Point(8, 60);
+            this.btnStart.Name = "btnStart";
+            this.btnStart.Size = new System.Drawing.Size(60, 27);
+            this.btnStart.TabIndex = 3;
+            this.btnStart.Text = "start";
+            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            // 
+            // btnStop
+            // 
+            this.btnStop.Location = new System.Drawing.Point(74, 60);
+            this.btnStop.Name = "btnStop";
+            this.btnStop.Size = new System.Drawing.Size(60, 27);
+            this.btnStop.TabIndex = 3;
+            this.btnStop.Text = "stop";
+            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            // 
+            // menuItem1
+            // 
+            this.menuItem1.MenuItems.Add(this.mnuExit);
+            this.menuItem1.Text = "File";
+            // 
+            // mnuExit
+            // 
+            this.mnuExit.Text = "Exit";
+            // 
+            // menuItem2
+            // 
+            this.menuItem2.MenuItems.Add(this.mnuGetProfiles);
+            this.menuItem2.Text = "Options";
+            // 
+            // mnuGetProfiles
+            // 
+            this.mnuGetProfiles.Text = "Get Profiles";
+            this.mnuGetProfiles.Click += new System.EventHandler(this.mnuGetProfiles_Click);
             // 
             // Form1
             // 
@@ -147,6 +208,13 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.DataGrid dataGrid2;
         private System.Windows.Forms.DataGrid dataGrid1;
+        private System.Windows.Forms.Button btnTrySwitch;
+        private System.Windows.Forms.MenuItem menuItem1;
+        private System.Windows.Forms.Button btnStop;
+        private System.Windows.Forms.Button btnStart;
+        private System.Windows.Forms.MenuItem mnuExit;
+        private System.Windows.Forms.MenuItem menuItem2;
+        private System.Windows.Forms.MenuItem mnuGetProfiles;
     }
 }
 

@@ -14,13 +14,13 @@ namespace RAC_switch
         wifi _wifi;
         System.Windows.Forms.Timer timer1;
         network _network;
+        bool isRAC = false;
 
         connector _connector;
 
         public Form1()
         {
             InitializeComponent();
-            bool isRAC = false;
             try
             {
                 _wifi = new wifi();
@@ -34,11 +34,22 @@ namespace RAC_switch
             {
                 MessageBox.Show(ex.Message);
             }
+            _network = new network();
+            
+            txtLog.Text += "\r\nNetwork start: " + (network._getConnected()?"connected":"disconnected");
+
+            //_network.networkChangedEvent += new network.networkChangeEventHandler(_network_networkChangedEvent);
+        }
+
+        void startConnector()
+        {
             if (isRAC)
             {
+                if (_connector != null)
+                    stopConnector();
                 _connector = new connector(new string[] { "SUPPORT", "Intermec" });
                 _connector.connectorChangedEvent += new connector.connectorChangeEventHandler(_connector_connectorChangedEvent);
-                
+
                 updateGrid();
 
                 dataGrid2.DataSource = _wifi._accesspoints;
@@ -46,17 +57,19 @@ namespace RAC_switch
                 timer1 = new Timer();
                 timer1.Tick += new EventHandler(timer1_Tick);
                 timer1.Interval = 30000; //all 30 seconds
-//                timer1.Enabled = true;
+                //                timer1.Enabled = true;
             }
             else
             {
                 txtLog.Text += "\r\nNo RAC installed";
             }
-            _network = new network();
-            
-            txtLog.Text += "\r\nNetwork start: " + (network._getConnected()?"connected":"disconnected");
-
-            _network.networkChangedEvent += new network.networkChangeEventHandler(_network_networkChangedEvent);
+        }
+        void stopConnector()
+        {
+            if (_connector == null)
+                return;
+            _connector.Dispose();
+            _connector = null;
         }
 
         void _connector_connectorChangedEvent(object sender, connector.ConnectorEventArgs args)
@@ -130,6 +143,27 @@ namespace RAC_switch
             else
                 txtLog.Text += "\r\nenable profile FAILED";
             updateGrid();
+        }
+
+        private void btnTrySwitch_Click(object sender, EventArgs e)
+        {
+            if(_connector!=null)
+                _connector.trySwitch();
+        }
+
+        private void mnuGetProfiles_Click(object sender, EventArgs e)
+        {
+            updateGrid();
+        }
+
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            startConnector();
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            stopConnector();
         }
     }
 }

@@ -90,7 +90,29 @@ namespace RAC_switch
                 return _ssAPI._racProfiles;
             }
         }
-        
+
+        public static string getAssociatedAP()
+        {
+            string currentSSID = "";
+            AdapterCollection ac = Networking.GetAdapters();
+            // Add the adapters
+            foreach (Adapter adapter in ac)
+            {
+                Logger.WriteLine("Adapter: " + adapter.Name);
+                if (adapter.Name == "TIWLN1")
+                {
+                    Logger.WriteLine("found TIWLN1");
+                    if (adapter.AssociatedAccessPoint != null)
+                    {
+                        currentSSID = adapter.AssociatedAccessPoint.Trim();
+                        Logger.WriteLine("Associated with: " + currentSSID);
+                    }
+                    break;
+                }
+            }
+            return currentSSID;
+        }
+
         public void UpdateAdapters()
         {
             // Get the available adapters

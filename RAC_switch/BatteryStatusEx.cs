@@ -5,7 +5,7 @@ using System.Text;
 
 using System.Runtime.InteropServices;
 
-using DWORD = System.Int32;
+using UInt16 = System.Int32;
 
 namespace batterylog2
 {
@@ -36,46 +36,46 @@ namespace batterylog2
             /// <summary>
             /// Number of seconds of battery life remaining, or BATTERY_LIFE_UNKNOWN if remaining seconds are unknown.
             /// </summary>
-            public DWORD BatteryLifeTime = 0;
+            public UInt16 BatteryLifeTime = 0;
             /// <summary>
             /// Number of seconds of battery life when at full charge, or BATTERY_LIFE_UNKNOWN if full battery lifetime is unknown.
             /// </summary>
-            public DWORD BatteryFullLifeTime = 0; //
+            public UInt16 BatteryFullLifeTime = 0; //
             public byte Reserved2=0;
             public byte BackupBatteryFlag=0;
             public byte BackupBatteryLifePercent=0;
             public byte Reserved3=0;
-            public DWORD BackupBatteryLifeTime=0;
-            public DWORD BackupBatteryFullLifeTime=0;
+            public UInt16 BackupBatteryLifeTime=0;
+            public UInt16 BackupBatteryFullLifeTime=0;
             /// <summary>
             /// Amount of battery voltage in millivolts (mV). This member can have a value in the range of 0 to 65,535.
             /// </summary>
-            public DWORD BatteryVoltage = 0;
+            public UInt16 BatteryVoltage = 0;
             /// <summary>
             /// Amount of instantaneous current drain in milliamperes (mA). This member can have a value in the range of 0 to 32,767 
             /// for charge, or 0 to –32,768 for discharge.
             /// </summary>
-            public DWORD BatteryCurrent = 0;
+            public UInt16 BatteryCurrent = 0;
             /// <summary>
             /// Short-term average of device current drain (mA). This member can have a value in the range 
             /// of 0 to 32,767 for charge, or 0 to –32,768 for discharge.
             /// </summary>
-            public DWORD BatteryAverageCurrent = 0;
+            public UInt16 BatteryAverageCurrent = 0;
             /// <summary>
             /// Time constant in milliseconds (ms) of integration used in reporting BatteryAverageCurrent.
             /// </summary>
-            public DWORD BatteryAverageInterval = 0;
+            public UInt16 BatteryAverageInterval = 0;
             /// <summary>
             /// Long-term cumulative average discharge in milliamperes per hour (mAH). This member can have a value in 
             /// the range of 0 to –32,768. This value can be reset by charging or changing the batteries.
             /// </summary>
-            public DWORD BatterymAHourConsumed=0;
+            public UInt16 BatterymAHourConsumed=0;
             /// <summary>
             /// Battery temperature in degrees Celsius. This member can have a value in the range of –3,276.8 to 3,276.7; 
             /// the increments are 0.1 degrees Celsius.
             /// </summary>
-            public DWORD BatteryTemperature=0;
-            public DWORD BackupBatteryVoltage=0;
+            public UInt16 BatteryTemperature=0;
+            public UInt16 BackupBatteryVoltage=0;
             public byte BatteryChemistry=0;
         }
         public enum ACLineStatus : byte

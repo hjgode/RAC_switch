@@ -98,6 +98,10 @@ namespace RAC_switch
             }
         }
 
+        /// <summary>
+        /// returns TRUE for device having a valid IP
+        /// </summary>
+        /// <returns>boolean</returns>
         public static bool _getConnected()
         {
             string hostname=Dns.GetHostName(); //local host name
