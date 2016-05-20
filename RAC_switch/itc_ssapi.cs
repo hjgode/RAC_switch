@@ -249,18 +249,16 @@ namespace RAC_switch
         /// </summary>
         /// <param name="ssid"></param>
         /// <returns></returns>
-        public int setRACprofile(string ssid)
+        public int setRACprofile(string sProfile)
         {
-            Logger.WriteLine("setRACprofile: " + ssid);
+            Logger.WriteLine("setRACprofile: " + sProfile);
             int iRet = 0;
             StringBuilder sb = new StringBuilder(1024);
             //find profile with ssid
             string profile = "";
             foreach (racProfile rac in _racProfiles)
             {
-                if (rac.sProfileLabel == "Default")
-                    continue; //next iteration
-                if (rac.sSSID == ssid)
+                if (rac.sProfileLabel == sProfile)
                 {
                     profile = rac.sProfileLabel;
                     enableProfile(rac.sProfileLabel, true);
@@ -268,7 +266,6 @@ namespace RAC_switch
                 }
                 else
                 {
-                    profile = rac.sProfileLabel;
                     enableProfile(rac.sProfileLabel, false);
                 }
             }

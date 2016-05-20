@@ -25,6 +25,9 @@ namespace RAC_switch
             {
                 _wifi = new wifi();
                 isRAC = true;
+                MobileConfiguration myConfig = new MobileConfiguration();
+                button1.Text = myConfig._profile1;
+                button2.Text = myConfig._profile2;
             }
             catch (NotSupportedException ex)
             {
@@ -47,7 +50,8 @@ namespace RAC_switch
             {
                 if (_connector != null)
                     stopConnector();
-                _connector = new connector(new string[] { "SUPPORT", "Intermec" });
+                //_connector = new connector(new string[] { "SUPPORT", "Intermec" });
+                _connector = new connector();
                 _connector.connectorChangedEvent += new connector.connectorChangeEventHandler(_connector_connectorChangedEvent);
 
                 updateGrid();
@@ -119,27 +123,30 @@ namespace RAC_switch
 
         private void Form1_Closed(object sender, EventArgs e)
         {
+            Cursor.Current = Cursors.WaitCursor;
+            this.Refresh();          
             if(_wifi!=null)
                 _wifi.Dispose();
             if (_network != null)
                 _network.Dispose();
             if (_connector != null)
                 _connector.Dispose();
+            Cursor.Current = Cursors.Default;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (_wifi.setRAC("INTERMEC") == 1)
-                txtLog.Text += "\r\nProfile with SSID INTERMEC enabled";
+            if (_wifi.setRAC(button1.Text) == 1)
+                txtLog.Text += "\r\nsetting Profile "+button1.Text+ " enabled";
             else
-                txtLog.Text += "\r\nenable profile FAILED";
+                txtLog.Text += "\r\nenable profile " + button1.Text + " FAILED";
             updateGrid();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if(_wifi.setRAC("SUPPORT")==1)
-                txtLog.Text += "\r\nProfile with SSID SUPPORT enabled";
+            if(_wifi.setRAC(button2.Text)==1)
+                txtLog.Text += "\r\nsetting Profile "+button2.Text+ " enabled";
             else
                 txtLog.Text += "\r\nenable profile FAILED";
             updateGrid();

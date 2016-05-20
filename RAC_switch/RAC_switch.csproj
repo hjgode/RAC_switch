@@ -84,6 +84,7 @@
     </Compile>
     <Compile Include="itc_ssapi.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="MobileConfiguration.cs" />
     <Compile Include="network.cs" />
     <Compile Include="PowerChanges.cs" />
     <Compile Include="PowerMessages.cs" />
@@ -105,6 +106,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App.Config">
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>

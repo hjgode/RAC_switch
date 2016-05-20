@@ -9,10 +9,19 @@ namespace RAC_switch
 {
     public class connector:IDisposable
     {
+        MobileConfiguration _myConfig = new MobileConfiguration();
+
+        #region CONFIG_VALUES
         /// <summary>
         /// list of profile in order of priority!
         /// </summary>
         string[] _profiles;
+        bool _bcheckOnResume = true;
+        bool _bcheckOnUndock = false;
+        int _iSwitchTimeout = 30;
+        bool _benableLogging = false;
+        #endregion
+
         object syncObject = new object();
         bool bInsideSwitch = false;
 
@@ -40,9 +49,21 @@ namespace RAC_switch
         EventWaitHandle evtStopThreads = new EventWaitHandle(false, EventResetMode.ManualReset, "evtStopThreads");
         #endregion
 
-        public connector(string[] profiles)
+        //public connector(string[] profiles)
+        public connector()
         {
-            _profiles = profiles;
+            //read config values
+            _profiles = new string[] { _myConfig._profile1, _myConfig._profile2 };
+            _bcheckOnUndock = _myConfig._checkOnUndock;
+            _bcheckOnResume = _myConfig._checkOnResume;
+            _iSwitchTimeout = _myConfig._switchTimeout;
+            _benableLogging = _myConfig._enableLogging;
+#if DEBUG
+            Logger.bEnableLogging = true;
+#else
+            Logger.bEnableLogging = _benableLogging;
+#endif
+            //_profiles = profiles;
             evtStopThreads.Reset(); // clear event
 
             OnConnecterMessage("connector initialized with profiles: ");
@@ -91,20 +112,18 @@ namespace RAC_switch
 
         public void Dispose()
         {
-            if (_workThread != null)
-            {
-                evtStopThreads.Set(); // stop all threads
-                _bStopThread = true;
-                Thread.Sleep(2000);
-                if (_workThread != null) 
-                    _workThread.Abort();
-                if (_connectThread != null)
-                    _connectThread.Abort();
-                if (_timerThread != null)
-                    _timerThread.Abort();
-                if (_PowerSourceMessages != null)
-                    _PowerSourceMessages.Dispose();
-            }
+            evtStopThreads.Set(); // stop all threads
+            _bStopThread = true;
+            Thread.Sleep(5000);
+            if (_workThread != null) 
+                _workThread.Abort();
+            if (_connectThread != null)
+                _connectThread.Abort();
+            if (_timerThread != null)
+                _timerThread.Abort();
+            if (_PowerSourceMessages != null)
+                _PowerSourceMessages.Dispose();
+            evtStopThreads.Reset();
         }
 
         public void trySwitch()
@@ -156,7 +175,7 @@ namespace RAC_switch
                 _ssRACapi.enableProfile(_profiles[0], true); //enable first profile
                 iConnectTry = 0;
                 //try for 40 seconds or so
-                while (!_bStopThread && iConnectTry < 30)
+                while (!_bStopThread && (iConnectTry < _iSwitchTimeout))
                 {
                     Thread.Sleep(1000);
                     iConnectTry++;
@@ -204,7 +223,7 @@ namespace RAC_switch
             EventWaitHandle[] handles = new EventWaitHandle[] { evtStopThreads, evtTime, evtDisconnect, evtPower, evtUndocked };
             try
             {
-                do
+                while(!stopp)
                 {
                     indx = EventWaitHandle.WaitAny(handles, 5000, false);
                     switch (indx)
@@ -224,16 +243,22 @@ namespace RAC_switch
                             doSwitch();
                             break;
                         case 3: //PowerOn
-                            OnConnecterMessage("myWorkerThread powerOn signaled");
-                            //try primary profile
-                            //try secondary profile
-                            doSwitch();
+                            if (_bcheckOnResume)
+                            {
+                                OnConnecterMessage("myWorkerThread powerOn signaled");
+                                //try primary profile
+                                //try secondary profile
+                                doSwitch();
+                            }
                             break;
                         case 4: //undocked
-                            OnConnecterMessage("myWorkerThread undocked signaled");
-                            //try primary profile
-                            //try secondary profile
-                            doSwitch();
+                            if (_bcheckOnUndock)
+                            {
+                                OnConnecterMessage("myWorkerThread undocked signaled");
+                                //try primary profile
+                                //try secondary profile
+                                doSwitch();
+                            }
                             break;
                         case EventWaitHandle.WAIT_FAILED:
                             break;
@@ -241,11 +266,12 @@ namespace RAC_switch
                             //OnConnecterMessage("myWorkerThread WAIT_TIMEOUT");
                             break;
                     }
-                } while (!stopp);
+                };
             }
             catch (ThreadAbortException ex)
             {
-                OnConnecterMessage("myWorkerThread ThreadAbortException: " + ex.Message);
+                //OnConnecterMessage("myWorkerThread ThreadAbortException: " + ex.Message);
+                ;
             }
             catch (Exception ex)
             {
@@ -321,7 +347,7 @@ namespace RAC_switch
             }
             catch (ThreadAbortException ex)
             {
-                OnConnecterMessage("connectWatchThread ThreadAbortException: " + ex.Message);
+                ;//OnConnecterMessage("connectWatchThread ThreadAbortException: " + ex.Message);
             }
             catch (Exception ex)
             {
@@ -364,7 +390,7 @@ namespace RAC_switch
             }
             catch (ThreadAbortException ex)
             {
-                OnConnecterMessage("timerThread ThreadAbortException: " + ex.Message);
+                ;// OnConnecterMessage("timerThread ThreadAbortException: " + ex.Message);
             }
             catch (Exception ex)
             {

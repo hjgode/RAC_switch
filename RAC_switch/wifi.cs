@@ -45,9 +45,6 @@ namespace RAC_switch
             }
             accesspointlist = new List<NearAccesPoints>();
             
-            preferedSSIDs.Add("SUPPORT");
-            preferedSSIDs.Add("INTERMEC");
-            
             start();
         }
         public void Dispose()
@@ -72,6 +69,13 @@ namespace RAC_switch
             UpdateAdapters();
             
             _ssAPI.listRACprofiles();
+
+            foreach (itc_ssapi.racProfile R in _ssAPI._racProfiles)
+            {
+                preferedSSIDs.Add(R.sSSID);
+                //preferedSSIDs.Add("SUPPORT");
+                //preferedSSIDs.Add("INTERMEC");
+            }
 
             //_ssAPI.setRACprofile("INTERMEC");
 
@@ -129,7 +133,7 @@ namespace RAC_switch
                     Logger.WriteLine("Associated with: " + adapter.AssociatedAccessPoint);
                     if (preferedSSIDs.Contains(adapter.AssociatedAccessPoint))
                     {
-                        Logger.WriteLine("device already connected to preferred SSID");
+                        Logger.WriteLine("device already connected to defined SSID");
                         continue; //exit foreach adapter
                     }
                     foreach (AccessPoint ap in adapter.NearbyAccessPoints)
@@ -141,16 +145,17 @@ namespace RAC_switch
                         
                         Logger.WriteLine("Found AP: " + ap.Name);
                         
-                        foreach (string s in preferedSSIDs)
-                        {
-                            if (ap.Name == s) // && adapter.AssociatedAccessPoint != s) 
-                            {                                                       
-                                //a preferred AP is in sight and we are not connected
-                                //switch network?
-                                Logger.WriteLine("will switch to '" + s + "'");
-                                _ssAPI.setRACprofile(s);//switch
-                            }
-                        }//list of preferred APs
+                        //connect to all known SSIDs?
+                        //foreach (string s in preferedSSIDs)
+                        //{
+                        //    if (ap.Name == s) // && adapter.AssociatedAccessPoint != s) 
+                        //    {                                                       
+                        //        //a preferred AP is in sight and we are not connected
+                        //        //switch network?
+                        //        Logger.WriteLine("will switch to '" + s + "'");
+                        //        _ssAPI.setRACprofile(s);//switch
+                        //    }
+                        //}//list of preferred APs
                     }//access points
                 }// TIWLN1
             }//adapters

@@ -89,7 +89,7 @@ namespace RAC_switch
             }
             catch (ThreadAbortException ex)
             {
-                System.Diagnostics.Debug.WriteLine("myThread: " + ex.Message);
+                ;// System.Diagnostics.Debug.WriteLine("myThread: " + ex.Message);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("myThread: " + ex.Message); }
             finally
