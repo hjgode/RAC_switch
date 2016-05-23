@@ -53,6 +53,9 @@ namespace RAC_switch
         #endregion
 
         private List<racProfile> _myRacProfiles = new List<racProfile>();
+        /// <summary>
+        /// returns the current list of RAC Profiles as defined in Registry
+        /// </summary>
         public List<racProfile> _racProfiles
         {
             get
@@ -114,7 +117,7 @@ namespace RAC_switch
             {
                 Logger.WriteLine("getRadioEnabled success");
                 string sTest = sb.ToString().Substring(sb.ToString().IndexOf("<Field Name=\"Radio Enabled\">") + "<Field Name=\"Radio Enabled\">".Length, 1);
-                Logger.WriteLine("getRadioEnabled success: sTest="+sTest);
+                //Logger.WriteLine("getRadioEnabled success: sTest="+sTest);
                 if (sTest == "1")
                     bRet = true;
                 else
@@ -202,7 +205,7 @@ namespace RAC_switch
             {
                 return "sProfileRekKey: " + _regKey +
                        "/ sProfileLabel :" + _profileLabel +
-                       "/ sSSID :" + _ssid + 
+                       "/ sSSID :" + _ssid.Trim() + 
                        "/ sEnabled :" + _enabled;
             }
         }

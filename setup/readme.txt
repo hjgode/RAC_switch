@@ -56,12 +56,3 @@ Log file
 	optional
 	name: \RAC_switch.log.txt
 	bak (2MB): \RAC_switch.log.txt.bak
-
-History
-	v001
-		initial version
-	v002
-		changed logger.cs to delete bak file first before rename...
-		changed logger.cs to check for file exist before checking file info
-		added version number and start line for log file
-		

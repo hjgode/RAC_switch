@@ -8,6 +8,9 @@ using System.Net;
 
 namespace RAC_switch
 {
+    /// <summary>
+    /// class to query or watch connection state (based on IP)
+    /// </summary>
     public class network:IDisposable
     {
         Thread backgroundThread;
@@ -31,6 +34,7 @@ namespace RAC_switch
                     backgroundThread.Abort();
             }
         }
+
 
         public delegate void networkChangeEventHandler(object sender, NetworkEventArgs eventArgs);
         public event networkChangeEventHandler networkChangedEvent; 
@@ -62,6 +66,9 @@ namespace RAC_switch
                 networkChangedEvent(this, e);
         }
 
+        /// <summary>
+        /// thread to watch the IP based connection state
+        /// </summary>
         void myThread()
         {
             _isRunning = true;

@@ -235,6 +235,7 @@ namespace RAC_switch
                             break;
                         case 1: //timer
                             OnConnecterMessage("myWorkerThread timer signaled");
+                            OnConnecterMessage("current profile: " + _ssRACapi.getCurrentProfile().sProfileLabel);
                             break;
                         case 2: //disconnect
                             OnConnecterMessage("myWorkerThread disconnect signaled");

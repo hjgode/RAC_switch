@@ -18,9 +18,12 @@ namespace RAC_switch
 
         connector _connector;
 
+        System.Windows.Forms.Timer timerMinimize = new Timer();
+
         public Form1()
         {
             InitializeComponent();
+            
             try
             {
                 _wifi = new wifi();
@@ -37,11 +40,32 @@ namespace RAC_switch
             {
                 MessageBox.Show(ex.Message);
             }
+            if (isRAC)
+            {
+                btnStart.Enabled = true;
+            }
+
             _network = new network();
             
-            txtLog.Text += "\r\nNetwork start: " + (network._getConnected()?"connected":"disconnected");
+            addLog("Network start: " + (network._getConnected()?"connected":"disconnected"));
+
+            timerMinimize.Interval = 1000;
+            timerMinimize.Tick += new EventHandler(timerMinimize_Tick);
+            timerMinimize.Enabled = true;
+
+            startConnector();
+            updateButtons();
 
             //_network.networkChangedEvent += new network.networkChangeEventHandler(_network_networkChangedEvent);
+        }
+
+        void timerMinimize_Tick(object sender, EventArgs e)
+        {
+            timerMinimize.Enabled = false;
+#if DEBUG
+#else
+            win32native.Minimize(this);
+#endif
         }
 
         void startConnector()
@@ -51,6 +75,7 @@ namespace RAC_switch
                 if (_connector != null)
                     stopConnector();
                 //_connector = new connector(new string[] { "SUPPORT", "Intermec" });
+                addLog("starting connector...");
                 _connector = new connector();
                 _connector.connectorChangedEvent += new connector.connectorChangeEventHandler(_connector_connectorChangedEvent);
 
@@ -65,15 +90,17 @@ namespace RAC_switch
             }
             else
             {
-                txtLog.Text += "\r\nNo RAC installed";
+                addLog("No RAC installed");
             }
         }
         void stopConnector()
         {
             if (_connector == null)
                 return;
+            addLog("STOP connector...");
             _connector.Dispose();
             _connector = null;
+            addLog("connector stopped.");
         }
 
         void _connector_connectorChangedEvent(object sender, connector.ConnectorEventArgs args)
@@ -137,25 +164,32 @@ namespace RAC_switch
         private void button1_Click(object sender, EventArgs e)
         {
             if (_wifi.setRAC(button1.Text) == 1)
-                txtLog.Text += "\r\nsetting Profile "+button1.Text+ " enabled";
+                addLog ("\r\nsetting Profile "+button1.Text+ " enabled");
             else
-                txtLog.Text += "\r\nenable profile " + button1.Text + " FAILED";
+                addLog("\r\nenable Profile " + button1.Text + " FAILED");
             updateGrid();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             if(_wifi.setRAC(button2.Text)==1)
-                txtLog.Text += "\r\nsetting Profile "+button2.Text+ " enabled";
+                addLog("setting Profile "+button2.Text+ " enabled");
             else
-                txtLog.Text += "\r\nenable profile FAILED";
+                addLog("enable profile FAILED");
             updateGrid();
         }
 
         private void btnTrySwitch_Click(object sender, EventArgs e)
         {
-            if(_connector!=null)
+            if (_connector != null)
+            {
+                addLog("trying to switch to preferred Profile");
                 _connector.trySwitch();
+            }
+            else
+            {
+                addLog("connector not running.");
+            }
         }
 
         private void mnuGetProfiles_Click(object sender, EventArgs e)
@@ -166,11 +200,38 @@ namespace RAC_switch
         private void btnStart_Click(object sender, EventArgs e)
         {
             startConnector();
+            updateButtons();
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
             stopConnector();
+            updateButtons();
         }
+
+        void updateButtons()
+        {
+            if (_connector != null)
+            {
+                btnStart.Enabled = false;
+                btnStop.Enabled = true;
+            }
+            else
+            {
+                btnStart.Enabled = true;
+                btnStop.Enabled = false;
+            }
+        }
+
+        private void mnuExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void mnuMinimize_Click(object sender, EventArgs e)
+        {
+            win32native.Minimize(this);
+        }
+
     }
 }

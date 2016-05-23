@@ -11,7 +11,8 @@ namespace RAC_switch
     {
         itc_ssapi _ssAPI = new itc_ssapi();
 
-        AdapterCollection m_adapters;
+//      AdapterCollection m_adapters;
+        OpenNETCF.Net.NetworkInformation.NetworkInterface[] m_adapters;
 
         List<string> preferedSSIDs = new List<string>();
 
@@ -66,9 +67,8 @@ namespace RAC_switch
 
         void start()
         {
-            UpdateAdapters();
             
-            _ssAPI.listRACprofiles();
+            //_ssAPI.listRACprofiles();
 
             foreach (itc_ssapi.racProfile R in _ssAPI._racProfiles)
             {
@@ -80,11 +80,13 @@ namespace RAC_switch
             //_ssAPI.setRACprofile("INTERMEC");
 
             //_ssAPI.listRACprofiles();
+
+            UpdateAdapters();
         }
 
-        public int setRAC(string sSSID)
+        public int setRAC(string sProfile)
         {
-            return _ssAPI.setRACprofile(sSSID);
+            return _ssAPI.setRACprofile(sProfile);
         }
 
         public List<itc_ssapi.racProfile> racProfiles
@@ -98,20 +100,19 @@ namespace RAC_switch
         public static string getAssociatedAP()
         {
             string currentSSID = "";
-            AdapterCollection ac = Networking.GetAdapters();
-            // Add the adapters
-            foreach (Adapter adapter in ac)
+            OpenNETCF.Net.NetworkInformation.NetworkInterface[] iFaces = (OpenNETCF.Net.NetworkInformation.NetworkInterface[])OpenNETCF.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+            foreach (OpenNETCF.Net.NetworkInformation.NetworkInterface ni in iFaces)
             {
-                Logger.WriteLine("Adapter: " + adapter.Name);
-                if (adapter.Name == "TIWLN1")
+                if (ni.NetworkInterfaceType == OpenNETCF.Net.NetworkInformation.NetworkInterfaceType.Wireless80211 ||
+                    ni.NetworkInterfaceType == OpenNETCF.Net.NetworkInformation.NetworkInterfaceType.Ethernet)
                 {
-                    Logger.WriteLine("found TIWLN1");
-                    if (adapter.AssociatedAccessPoint != null)
+                    if (ni.Name == "TIWLN1")
                     {
-                        currentSSID = adapter.AssociatedAccessPoint.Trim();
+                        OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface wIface = (OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface)ni;
+                        currentSSID = wIface.AssociatedAccessPoint.Trim();
                         Logger.WriteLine("Associated with: " + currentSSID);
+                        break;
                     }
-                    break;
                 }
             }
             return currentSSID;
@@ -120,43 +121,71 @@ namespace RAC_switch
         public void UpdateAdapters()
         {
             // Get the available adapters
-            m_adapters = Networking.GetAdapters();
+            m_adapters = (OpenNETCF.Net.NetworkInformation.NetworkInterface[])OpenNETCF.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+//            m_adapters = Networking.GetAdapters();
             accesspointlist.Clear();
 
             // Add the adapters
-            foreach (Adapter adapter in m_adapters)
+//            foreach (Adapter adapter in m_adapters)   //Adapter is deprecated
+            foreach (OpenNETCF.Net.NetworkInformation.NetworkInterface adapter in m_adapters)
             {
                 Logger.WriteLine("Adapter: " + adapter.Name);
                 if (adapter.Name == "TIWLN1")
                 {
                     Logger.WriteLine("found TIWLN1");
-                    Logger.WriteLine("Associated with: " + adapter.AssociatedAccessPoint);
-                    if (preferedSSIDs.Contains(adapter.AssociatedAccessPoint))
+                    OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface wni=(OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface)adapter;
+                    string currentAP=wni.AssociatedAccessPoint;
+                    Logger.WriteLine("Associated with: " + currentAP);
+                    accesspointlist.Add(new NearAccesPoints(wni.Name, wni.SignalStrength.Decibels, (int)(wni.WEPStatus)));
+                    if (preferedSSIDs.Contains(currentAP))
                     {
                         Logger.WriteLine("device already connected to defined SSID");
                         continue; //exit foreach adapter
                     }
-                    foreach (AccessPoint ap in adapter.NearbyAccessPoints)
-                    {
-                        //Logger.WriteLine("AP: " + ap.Name +":"+ ap.SignalStrengthInDecibels.ToString() + ", " + 
-                        //    ap.InfrastructureMode.ToString() + ", " + ap.Privacy.ToString());
-                        
-                        accesspointlist.Add(new NearAccesPoints(ap.Name, ap.SignalStrengthInDecibels, ap.Privacy));
-                        
-                        Logger.WriteLine("Found AP: " + ap.Name);
-                        
-                        //connect to all known SSIDs?
-                        //foreach (string s in preferedSSIDs)
-                        //{
-                        //    if (ap.Name == s) // && adapter.AssociatedAccessPoint != s) 
-                        //    {                                                       
-                        //        //a preferred AP is in sight and we are not connected
-                        //        //switch network?
-                        //        Logger.WriteLine("will switch to '" + s + "'");
-                        //        _ssAPI.setRACprofile(s);//switch
-                        //    }
-                        //}//list of preferred APs
-                    }//access points
+
+                    //Adapter is deprecated, and then AP list is only available for WZC interfaces
+                    //OpenNETCF.Net.NetworkInformation.WirelessZeroConfigNetworkInterface INw;
+                    //try
+                    //{
+                    //    INw = (OpenNETCF.Net.NetworkInformation.WirelessZeroConfigNetworkInterface)adapter;    ///< Obtain wireless zero configuration interface                     }
+                    //    OpenNETCF.Net.NetworkInformation.AccessPointCollection accessPointCollection = INw.NearbyAccessPoints;
+                    //    OpenNETCF.Net.NetworkInformation.AccessPointCollection accessPoints = INw.NearbyAccessPoints;
+
+                    //    Logger.WriteLine("Wireless Network available are:");
+                    //    /// Get available wireless network 
+                    //    foreach (OpenNETCF.Net.NetworkInformation.AccessPoint AP in accessPointCollection)
+                    //    {
+                    //        Logger.WriteLine(AP.Name +" : " + AP.SignalStrength.Decibels.ToString());
+                    //        accesspointlist.Add(new NearAccesPoints(AP.Name, AP.SignalStrength.Decibels, AP.Privacy));
+                    //    }                   
+                    //}
+                    //catch
+                    //{
+                    //    Logger.WriteLine("Network interface " + adapter.Name +" is not Wireless Zero Configuration");
+                    //}
+
+                    //Adapter is deprecated, and then AP list is only available for WZC interfaces
+                    //foreach (AccessPoint ap in adapter.NearbyAccessPoints)
+                    //{
+                    //    //Logger.WriteLine("AP: " + ap.Name +":"+ ap.SignalStrengthInDecibels.ToString() + ", " + 
+                    //    //    ap.InfrastructureMode.ToString() + ", " + ap.Privacy.ToString());
+
+                    //    accesspointlist.Add(new NearAccesPoints(ap.Name, ap.SignalStrengthInDecibels, ap.Privacy));
+
+                    //    Logger.WriteLine("Found AP: " + ap.Name.Trim());
+
+                    //    //connect to all known SSIDs?
+                    //    //foreach (string s in preferedSSIDs)
+                    //    //{
+                    //    //    if (ap.Name == s) // && adapter.AssociatedAccessPoint != s) 
+                    //    //    {                                                       
+                    //    //        //a preferred AP is in sight and we are not connected
+                    //    //        //switch network?
+                    //    //        Logger.WriteLine("will switch to '" + s + "'");
+                    //    //        _ssAPI.setRACprofile(s);//switch
+                    //    //    }
+                    //    //}//list of preferred APs
+                    //}//access points
                 }// TIWLN1
             }//adapters
         }
