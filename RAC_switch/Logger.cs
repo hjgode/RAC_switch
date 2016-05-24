@@ -24,7 +24,8 @@ namespace RAC_switch
                         System.IO.FileInfo fi = new FileInfo(sLogFile);
                         if (fi.Length > 2000000)
                         {
-                            System.IO.File.Delete(sLogFile + ".bak");
+                            if (System.IO.File.Exists(sLogFile+ ".bak"))
+                                System.IO.File.Delete(sLogFile + ".bak");
                             System.IO.File.Move(sLogFile, sLogFile + ".bak");
                         }
                     }
@@ -46,11 +47,16 @@ namespace RAC_switch
             get
             {
                 DateTime now = DateTime.Now;
-                return String.Format("{0:04}{1:02}{2:02} {3:02}{4:02}{5:02}",
+                return String.Format("{0:0000}{1:00}{2:00} {3:00}{4:00}{5:00}",
                     now.Year, now.Month, now.Day,
                     now.Hour, now.Minute, now.Second);
             }
         }
+
+        /// <summary>
+        /// return current assembly version number
+        /// </summary>
+        /// <returns>reversed version without dots</returns>
         public static string getVersion()
         {
             string s = "001";
@@ -59,6 +65,11 @@ namespace RAC_switch
             return myVersion(s);
         }
 
+        /// <summary>
+        /// reverse assembly version and remove dots
+        /// </summary>
+        /// <param name="s">ie 1.0.0.0</param>
+        /// <returns>ie 0001</returns>
         static string myVersion(string s)
         {
             string sIn = s;

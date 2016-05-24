@@ -13,7 +13,7 @@
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>b2c48bd2-963d-4549-9169-1fa021dce484</PlatformID>
     <OSVersion>5.2</OSVersion>
-    <DeployDirSuffix>RAC_switch</DeployDirSuffix>
+    <DeployDirSuffix>Honeywell\RAC_switch</DeployDirSuffix>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <NativePlatformName>Windows Mobile 6 Professional SDK</NativePlatformName>
     <FormFactorID>

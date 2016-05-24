@@ -75,8 +75,14 @@ namespace RAC_switch
             {
                 throw new NotSupportedException("RAC not active");
             }
+
+            //list profiles and disable all first, only one should be enabled
             foreach (string s in _profiles)
+            {
                 OnConnecterMessage("\t" + s);
+                _ssRACapi.enableProfile(s, false);
+            }
+            _ssRACapi.enableProfile(_profiles[0], true); //enable primary profile
 
             _workThread = new Thread(new ThreadStart(myWorkerThread));
             _workThread.Name = "myWorkerThread";
@@ -328,6 +334,7 @@ namespace RAC_switch
                                 break;
                             }
                             associatedAP=wifi.getAssociatedAP();
+                            //TODO
                             OnConnecterMessage("connectWatchThread: associatedAP AP=" + associatedAP);
                             if (associatedAP == this._ssRACapi._racProfiles[0].sSSID)
                             {

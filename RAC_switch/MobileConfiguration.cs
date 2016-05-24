@@ -7,12 +7,38 @@ using System.IO;
 using System.Xml;
 using System.Reflection;
 using System.Collections.Specialized;
+using System.Collections;
 
 namespace RAC_switch
 {
     class MobileConfiguration
     {
-        static NameValueCollection _defaultSettings=new NameValueCollection();
+        public class myCompareString:IComparer<itc_ssapi.racProfile>
+        {
+            // TODO: Comparison logic :)
+            MobileConfiguration _myConfig=null;
+            List<string> orderedStrings=null;
+
+            public myCompareString()
+            {
+                _myConfig = new MobileConfiguration();
+                orderedStrings = new List<string>();
+                orderedStrings.Add(_myConfig._profile1);
+                orderedStrings.Add(_myConfig._profile2);
+            }
+            public int Compare(itc_ssapi.racProfile x, itc_ssapi.racProfile y)
+            {
+                int xi = orderedStrings.IndexOf(x.sProfileLabel); // -1 if not found!
+                int yi = orderedStrings.IndexOf(y.sProfileLabel);
+                if (xi > yi)
+                    return 1;
+                if (xi < yi)
+                    return -1;
+                return 0;
+            }
+        }
+
+        static NameValueCollection _defaultSettings = new NameValueCollection();
         static NameValueCollection defaultConfig
         {
             get
@@ -110,6 +136,7 @@ namespace RAC_switch
                 }
             }
         }
+
         //static void readSettings(){
         //    _profile1 = _Settings["profile1"];
         //    _profile2 = _Settings["profile2"];

@@ -64,4 +64,10 @@ History
 		changed logger.cs to delete bak file first before rename...
 		changed logger.cs to check for file exist before checking file info
 		added version number and start line for log file
+		corrected log file timestamp formatting
+		corrected rac_profiles list to be sorted by profile1/2
+		if more than one profile is enabled during start, doSwitch will not switch!
+			corrected: on startup all profiles except the primary one are disabled
+		reverted wifi.cs back to deprecated OpenNetCF functions, they do not throw
+		irregular exceptions
 		

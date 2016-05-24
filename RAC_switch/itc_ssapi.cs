@@ -243,6 +243,9 @@ namespace RAC_switch
                     Logger.WriteLine("Exception in listRACprofiles read networks. " + ex.Message);
                 }
             }
+            //sort rac profiles by profile1 and profile2
+            _myRacProfiles.Sort(new MobileConfiguration.myCompareString());
+            
             return _myRacProfiles;
         }
 
