@@ -18,6 +18,8 @@ namespace RAC_switch
         bool _isConnected = false;
         bool _bStopThread = false;
         static IPAddress _currentIP = IPAddress.Loopback;
+        static MobileConfiguration _myConfig = new MobileConfiguration();
+        static itc_ssapi _ssRACapi = new itc_ssapi();
 
         public network()
         {
@@ -111,29 +113,40 @@ namespace RAC_switch
         /// <returns>boolean</returns>
         public static bool _getConnected()
         {
-            string hostname=Dns.GetHostName(); //local host name
-            IPHostEntry _hostEntry = Dns.GetHostEntry(hostname);
-            bool bLocalsOnly = true;
-            foreach (IPAddress a in _hostEntry.AddressList)
+            if (_myConfig._checkConnectIP)
             {
-                System.Diagnostics.Debug.WriteLine(a.ToString()); // 169.254.2.1, 127.0.0.1
-                if (a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                string hostname = Dns.GetHostName(); //local host name
+                IPHostEntry _hostEntry = Dns.GetHostEntry(hostname);
+                bool bLocalsOnly = true;
+                foreach (IPAddress a in _hostEntry.AddressList)
                 {
+                    System.Diagnostics.Debug.WriteLine(a.ToString()); // 169.254.2.1, 127.0.0.1
+                    if (a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
 #if DEBUG
                     if (a.ToString() != "127.0.0.1")
 #else
-                    if (a.ToString() != "169.254.2.1" && a.ToString() != "127.0.0.1")
+                        if (a.ToString() != "169.254.2.1" && a.ToString() != "127.0.0.1")
 #endif
-                    {
-                        bLocalsOnly = false;
-                        _currentIP = a;
+                        {
+                            bLocalsOnly = false;
+                            _currentIP = a;
+                        }
                     }
                 }
+                if (bLocalsOnly)
+                    return false;
+                else
+                    return true;
             }
-            if (bLocalsOnly)
-                return false;
             else
-                return true;
+            {
+                string ssid = _ssRACapi.getCurrentProfile().sSSID;
+                if (wifi.isAssociated(ssid))
+                    return true;
+                else
+                    return false;
+            }
         }
     }
 }

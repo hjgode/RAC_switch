@@ -21,18 +21,20 @@ Installation
 Configuration
   see app.config file in program dir
   example:
-  
-        <?xml version="1.0" encoding="utf-8" ?>
-        <configuration>
-          <appSettings>
-            <add key="profile1" value="SUPPORT" />
-            <add key="profile2" value="Intermec" />
-            <add key="checkOnUndock" value="false" />
-            <add key="checkOnResume" value="true" />
-            <add key="switchTimeout" value="60"/>
-            <add key="enableLogging" value="false" />
-          </appSettings>
-        </configuration>
+		<?xml version="1.0" encoding="utf-8" ?>
+		<configuration>
+		  <appSettings>
+			<add key="profile1" value="Fuhrpark_PDA" />
+			<add key="profile2" value="MI-RC.51" />
+			<add key="checkOnUndock" value="false" />
+			<add key="checkOnResume" value="true" />
+			<add key="checkConnectIP" value="false=" />
+			<add key="checkConnectAP" value="true=" />
+			<add key="switchOnDisconnect" value="false" />
+			<add key="switchTimeout" value="60"/>
+			<add key="enableLogging" value="false" />
+		  </appSettings>
+		</configuration>
   
   meanings:
     profile1 is the name of the preferred RAC profile (not the SSID inside)
@@ -70,4 +72,8 @@ History
 			corrected: on startup all profiles except the primary one are disabled
 		reverted wifi.cs back to deprecated OpenNetCF functions, they do not throw
 		irregular exceptions
-		
+	v003
+		added setting switchOnDisconnect, was enabled by default
+		added settings checkConnectIP
+			if checkConnectIP is true, the app waits for a valid local IP
+			if checkConnectIP is false, the app will only check if desired SSID is associated			

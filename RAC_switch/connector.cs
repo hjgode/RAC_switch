@@ -18,6 +18,7 @@ namespace RAC_switch
         string[] _profiles;
         bool _bcheckOnResume = true;
         bool _bcheckOnUndock = false;
+        bool _bswitchOnDisconnect = false;
         int _iSwitchTimeout = 30;
         bool _benableLogging = false;
         #endregion
@@ -56,6 +57,7 @@ namespace RAC_switch
             _profiles = new string[] { _myConfig._profile1, _myConfig._profile2 };
             _bcheckOnUndock = _myConfig._checkOnUndock;
             _bcheckOnResume = _myConfig._checkOnResume;
+            _bswitchOnDisconnect = _myConfig._switchOnDisconnect;
             _iSwitchTimeout = _myConfig._switchTimeout;
             _benableLogging = _myConfig._enableLogging;
 #if DEBUG
@@ -139,6 +141,7 @@ namespace RAC_switch
 
         /// <summary>
         /// this function tries to switch to the preferred network
+        /// and falls back to second profile if 1st did not connect
         /// </summary>
         void doSwitch()
         {
@@ -150,16 +153,21 @@ namespace RAC_switch
             lock (syncObject)
                 bInsideSwitch=true;
 
+            OnConnecterMessage("DoSwitch() start...");
+            Logger.WriteLine("DoSwitch() start...");
+
             int iConnectTry = 0;
             //is first profile active?
             string currentProfile = _ssRACapi.getCurrentProfile().sProfileLabel;
+            string desiredSSID = _ssRACapi.getCurrentProfile().sSSID;
             OnConnecterMessage("current profile=" + currentProfile);
+            //is the preferred profile active?
             if (currentProfile == _profiles[0])
             {
                 OnConnecterMessage("Current Profile = First profile");
                 if (network._getConnected() == false)
                 { //not connected
-                    OnConnecterMessage("network not connected. Switching profiles...");
+                    OnConnecterMessage("network not connected. Switching to 2nd profile...");
                     _ssRACapi.enableProfile(_profiles[0], false); //disable first profile
                     _ssRACapi.enableProfile(_profiles[1], true); //enable second profile
                 }
@@ -170,8 +178,9 @@ namespace RAC_switch
             }
             else if (_ssRACapi.getCurrentProfile().sProfileLabel == _profiles[1])
             {
+                desiredSSID = _ssRACapi._racProfiles[1].sSSID;
                 OnConnecterMessage("Current Profile = Second profile");
-                if (network._getConnected() == false)
+                if ( network._getConnected() == false)
                     OnConnecterMessage("secondary profile not connected");
                 else
                     OnConnecterMessage("secondary profile connected");
@@ -179,25 +188,35 @@ namespace RAC_switch
                 OnConnecterMessage("Trying first Profile. Switching ...");
                 _ssRACapi.enableProfile(_profiles[1], false); //disable second profile
                 _ssRACapi.enableProfile(_profiles[0], true); //enable first profile
+                desiredSSID = _ssRACapi._racProfiles[0].sSSID;
                 iConnectTry = 0;
                 //try for 40 seconds or so
                 while (!_bStopThread && (iConnectTry < _iSwitchTimeout))
                 {
                     Thread.Sleep(1000);
                     iConnectTry++;
-                    if (network._getConnected() == true)
-                        break;
+                    if (_myConfig._checkConnectIP)
+                    {
+                        if (network._getConnected() == true)    // do not care about AP association
+                            break;
+                    }
+                    else //check AP association but not IP
+                    {
+                        if (wifi.isAssociated(desiredSSID) == true) // do not care about IP
+                            break;
+                    }
                 }
+                //another test for being connected
                 if (network._getConnected() == false)
                 {
                     OnConnecterMessage("First Profile did not connect. Switching to secondary profile...");
                     //switch back
-                    _ssRACapi.enableProfile(_profiles[0], false); //enable first profile
-                    _ssRACapi.enableProfile(_profiles[1], true); //disable second profile
+                    _ssRACapi.enableProfile(_profiles[0], false); //disable first profile
+                    _ssRACapi.enableProfile(_profiles[1], true);  //enable second profile
                 }
                 else
                 {
-                    OnConnecterMessage("primary network did connect.");
+                    OnConnecterMessage("primary network connected.");
                 }
             }
             else
@@ -207,6 +226,8 @@ namespace RAC_switch
 
             lock (syncObject)
                 bInsideSwitch = false;
+            OnConnecterMessage("DoSwitch() end.");
+            Logger.WriteLine("DoSwitch() end.");
         }
 
         /// <summary>
@@ -244,17 +265,15 @@ namespace RAC_switch
                             OnConnecterMessage("current profile: " + _ssRACapi.getCurrentProfile().sProfileLabel);
                             break;
                         case 2: //disconnect
-                            OnConnecterMessage("myWorkerThread disconnect signaled");
-                            //try primary profile
-                            //try secondary profile
-                            doSwitch();
+                            if(_bswitchOnDisconnect){
+                                OnConnecterMessage("myWorkerThread disconnect signaled");
+                                doSwitch();
+                            }
                             break;
                         case 3: //PowerOn
                             if (_bcheckOnResume)
                             {
                                 OnConnecterMessage("myWorkerThread powerOn signaled");
-                                //try primary profile
-                                //try secondary profile
                                 doSwitch();
                             }
                             break;

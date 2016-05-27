@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.Config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon1.ico" />
   </ItemGroup>

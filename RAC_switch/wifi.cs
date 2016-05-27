@@ -101,24 +101,41 @@ namespace RAC_switch
             }
         }
 
-        public static string getAssociatedAP()
+        public static bool isAssociated(string ssid)
         {
+            Logger.WriteLine("Testing association against '" + ssid+"'");
+            string getssid=getAssociatedAP();
+            if (getssid.Length == 0)
+                return false;
+            if (getssid == ssid)
+                return true;
+            else
+                return false;
+        }
+
+        public static string getAssociatedAP()
+        {            
             string currentSSID = "";
-            OpenNETCF.Net.NetworkInformation.NetworkInterface[] iFaces = (OpenNETCF.Net.NetworkInformation.NetworkInterface[])OpenNETCF.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
-            foreach (OpenNETCF.Net.NetworkInformation.NetworkInterface ni in iFaces)
+            try
             {
-                if (ni.NetworkInterfaceType == OpenNETCF.Net.NetworkInformation.NetworkInterfaceType.Wireless80211 ||
-                    ni.NetworkInterfaceType == OpenNETCF.Net.NetworkInformation.NetworkInterfaceType.Ethernet)
+                OpenNETCF.Net.NetworkInformation.NetworkInterface[] iFaces = (OpenNETCF.Net.NetworkInformation.NetworkInterface[])OpenNETCF.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
+                foreach (OpenNETCF.Net.NetworkInformation.NetworkInterface ni in iFaces)
                 {
-                    if (ni.Name == "TIWLN1")
+                    if (ni.NetworkInterfaceType == OpenNETCF.Net.NetworkInformation.NetworkInterfaceType.Wireless80211 ||
+                        ni.NetworkInterfaceType == OpenNETCF.Net.NetworkInformation.NetworkInterfaceType.Ethernet)
                     {
-                        OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface wIface = (OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface)ni;
-                        currentSSID = wIface.AssociatedAccessPoint.Trim();
-                        Logger.WriteLine("Associated with: " + currentSSID);
-                        break;
+                        if (ni.Name == "TIWLN1")
+                        {
+                            OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface wIface = (OpenNETCF.Net.NetworkInformation.WirelessNetworkInterface)ni;
+                            currentSSID = wIface.AssociatedAccessPoint.Trim();
+                            Logger.WriteLine("Associated with: " + currentSSID);
+                            break;
+                        }
                     }
                 }
             }
+            catch (Exception)
+            { }
             return currentSSID;
         }
 

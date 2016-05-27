@@ -49,11 +49,21 @@ namespace RAC_switch
                 _defaultSettings.Add("checkOnUndock", false.ToString());
                 _defaultSettings.Add("checkOnResume", true.ToString());
                 _defaultSettings.Add("switchTimeout", "30");
+                _defaultSettings.Add("checkConnectIP", "false");
                 _defaultSettings.Add("enableLogging", false.ToString());
+                _defaultSettings.Add("switchOnDisconnect", false.ToString());
                 return _defaultSettings;
             }
         }
 
+        public bool _checkConnectIP
+        {
+            get
+            {
+                readConfig();
+                return bool.Parse(_Settings["checkConnectIP"]);
+            }
+        }
         public string _profile1
         {
             get
@@ -84,6 +94,14 @@ namespace RAC_switch
             {
                 readConfig();
                 return bool.Parse(_Settings["checkOnResume"]);
+            }
+        }
+        public bool _switchOnDisconnect
+        {
+            get
+            {
+                readConfig();
+                return bool.Parse(_Settings["switchOnDisconnect"]);
             }
         }
         public int _switchTimeout{
