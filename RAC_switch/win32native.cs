@@ -9,8 +9,9 @@ namespace RAC_switch
     {
         [DllImport("coredll.dll")]
         static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
-
         const int SW_MINIMIZED = 6;
+
+
 
         public static void Minimize(System.Windows.Forms.Form frm)
         {

@@ -33,6 +33,7 @@
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.mnuExit = new System.Windows.Forms.MenuItem();
+            this.mnuMinimize = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.mnuGetProfiles = new System.Windows.Forms.MenuItem();
             this.button1 = new System.Windows.Forms.Button();
@@ -46,7 +47,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dataGrid2 = new System.Windows.Forms.DataGrid();
             this.dataGrid1 = new System.Windows.Forms.DataGrid();
-            this.mnuMinimize = new System.Windows.Forms.MenuItem();
+            this.mnuAbout = new System.Windows.Forms.MenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -68,9 +69,15 @@
             this.mnuExit.Text = "Exit";
             this.mnuExit.Click += new System.EventHandler(this.mnuExit_Click);
             // 
+            // mnuMinimize
+            // 
+            this.mnuMinimize.Text = "Minimize";
+            this.mnuMinimize.Click += new System.EventHandler(this.mnuMinimize_Click);
+            // 
             // menuItem2
             // 
             this.menuItem2.MenuItems.Add(this.mnuGetProfiles);
+            this.menuItem2.MenuItems.Add(this.mnuAbout);
             this.menuItem2.Text = "Options";
             // 
             // mnuGetProfiles
@@ -186,10 +193,10 @@
             this.dataGrid1.Size = new System.Drawing.Size(226, 93);
             this.dataGrid1.TabIndex = 4;
             // 
-            // mnuMinimize
+            // mnuAbout
             // 
-            this.mnuMinimize.Text = "Minimize";
-            this.mnuMinimize.Click += new System.EventHandler(this.mnuMinimize_Click);
+            this.mnuAbout.Text = "About";
+            this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
             // 
             // Form1
             // 
@@ -229,6 +236,7 @@
         private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.MenuItem mnuGetProfiles;
         private System.Windows.Forms.MenuItem mnuMinimize;
+        private System.Windows.Forms.MenuItem mnuAbout;
     }
 }
 

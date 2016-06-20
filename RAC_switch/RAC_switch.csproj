@@ -104,6 +104,7 @@
     </Compile>
     <Compile Include="wifi.cs" />
     <Compile Include="win32native.cs" />
+    <Compile Include="WinAPIReady.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="readme.txt" />

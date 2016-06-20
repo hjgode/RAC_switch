@@ -24,6 +24,16 @@ namespace RAC_switch
         {
             InitializeComponent();
             
+            //we have to wait for the Windows APIs being loaded...
+            WinAPIReady winReady = new WinAPIReady();
+            int maxWait = 20;
+            do
+            {
+                System.Threading.Thread.Sleep(1000);
+                maxWait--;
+            } while (winReady.ApiIsReay == false && maxWait>0);
+            winReady.Dispose();
+
             try
             {
                 _wifi = new wifi();
@@ -57,6 +67,11 @@ namespace RAC_switch
             updateButtons();
 
             //_network.networkChangedEvent += new network.networkChangeEventHandler(_network_networkChangedEvent);
+        }
+
+        void winReady_apiChangedEvent(object sender, WinAPIReady.ApiEventArgs args)
+        {
+            throw new NotImplementedException();
         }
 
         void timerMinimize_Tick(object sender, EventArgs e)
@@ -231,6 +246,11 @@ namespace RAC_switch
         private void mnuMinimize_Click(object sender, EventArgs e)
         {
             win32native.Minimize(this);
+        }
+
+        private void mnuAbout_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("RAC_Switch version " + Logger.getVersion());
         }
 
     }

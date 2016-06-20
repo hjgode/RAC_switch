@@ -29,6 +29,26 @@ namespace RAC_switch
             this.Handle = NativeMethods.CreateEvent(IntPtr.Zero, mode == EventResetMode.ManualReset, initialState, name);
         }
 
+        /// <summary>
+        /// create a handle to existing system event
+        /// </summary>
+        /// <param name="name">name of system event</param>
+        public EventWaitHandle(string name)
+        {
+            try
+            {
+                this.Handle = NativeMethods.OpenEvent(NativeMethods.EventAccess.EVENT_ALL_ACCESS, false, name);
+                if (this.Handle == IntPtr.Zero)
+                {
+                    System.Diagnostics.Debug.WriteLine("EventWaitHandle: OpenSystemEvent Error: " + Marshal.GetLastWin32Error().ToString());
+                }
+            }
+            catch (Exception)
+            {
+                this.Handle = IntPtr.Zero;
+            }
+        }
+
         public bool Set()
         {
             return NativeMethods.EventModify(this.Handle, NativeMethods.EVENT.SET);
@@ -53,6 +73,18 @@ namespace RAC_switch
             }
 
             return NativeMethods.WaitForMultipleObjects(handles.Length, handles, false, millisecondsTimeout);
+        }
+        [Obsolete("NOT SUPPORTED on Windows CE")]
+        public static int WaitAll(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext)
+        {
+            throw new NotSupportedException("WaitForMultipleObjects with WaitAll is NOT SUPPORTED on Windows CE");
+            IntPtr[] handles = new IntPtr[waitHandles.Length];
+            for (int i = 0; i < handles.Length; i++)
+            {
+                handles[i] = waitHandles[i].Handle;
+            }
+
+            return NativeMethods.WaitForMultipleObjects(handles.Length, handles, true, millisecondsTimeout);
         }
 
 
@@ -90,6 +122,16 @@ namespace RAC_switch
 
             [DllImport("coredll", SetLastError = true)]
             internal static extern IntPtr CreateEvent(IntPtr lpEventAttributes, bool bManualReset, bool bInitialState, string lpName);
+
+            [DllImport("coredll.dll", SetLastError = true)]
+            internal static extern IntPtr OpenEvent(uint desiredAccess, bool inheritHandle, string name);
+
+            internal static class EventAccess
+            {
+                public static uint SYNCHRONIZE { get { return 0x00100000; } }
+                public static uint STANDARD_RIGHTS_REQUIRED { get { return 0x000F0000; } }
+                public static uint EVENT_ALL_ACCESS { get { return STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3; } }
+            }
 
             [DllImport("coredll", SetLastError = true)]
             internal static extern bool CloseHandle(IntPtr hObject);
