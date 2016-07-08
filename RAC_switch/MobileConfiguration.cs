@@ -61,7 +61,13 @@ namespace RAC_switch
             get
             {
                 readConfig();
-                return bool.Parse(_Settings["checkConnectIP"]);
+                bool chk_connect = false;
+                try
+                {
+                    chk_connect = bool.Parse(_Settings["checkConnectIP"]);
+                }
+                catch (Exception) { }
+                return chk_connect;
             }
         }
         public string _profile1

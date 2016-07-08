@@ -150,47 +150,56 @@ namespace RAC_switch
         {
             Logger.WriteLine("WinApiReady-myWorkerThread starting...");
             bool bStop=false;
+            int maxTries = 10;
             try
             {
                 do
                 {
-                    bool uWaitStop = hStopThread.WaitOne(500, false);// WaitForSingleObject(hStopThread, 500);
-                    if (uWaitStop)
+                    bool bWaitAll = EventWaitHandle.WaitAll(hEvents, 30, false); //blocks up to 30 seconds
+                    if (bWaitAll)
                     {
+                        _ApiIsReady = true;
                         bStop = true;
-                        break;
+                        OnApiChangeMessage(true);
                     }
+                    maxTries--;
+                    //    hStopThread.WaitOne(500, false);// WaitForSingleObject(hStopThread, 500);
+                    //if (uWaitStop)
+                    //{
+                    //    bStop = true;
+                    //    break;
+                    //}
 
-                    //only first event is reported all the time!
-                    long uWaitApiReady = EventWaitHandle.WaitAny(hEvents, 500, false);// WaitForMultipleObjects(hEvents.Length, hEvents, true, 500); //wait for all events being set
-                    switch (uWaitApiReady)
-                    {
-                        case 0:
-                            Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
-                            break;
-                        case 1:
-                            Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
-                            break;
-                        case 2:
-                            Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
-                            break;
-                        case 3:
-                            Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
-                            break;
-                        case 4:
-                            Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
-                            break;
-                        case 5:
-                            Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
-                            break;
-                    }
+                    ////only first event is reported all the time!
+                    //long uWaitApiReady = EventWaitHandle.WaitAny(hEvents, 500, false);// WaitForMultipleObjects(hEvents.Length, hEvents, true, 500); //wait for all events being set
+                    //switch (uWaitApiReady)
+                    //{
+                    //    case 0:
+                    //        Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
+                    //        break;
+                    //    case 1:
+                    //        Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
+                    //        break;
+                    //    case 2:
+                    //        Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
+                    //        break;
+                    //    case 3:
+                    //        Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
+                    //        break;
+                    //    case 4:
+                    //        Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
+                    //        break;
+                    //    case 5:
+                    //        Logger.WriteLine("API " + eventNames[uWaitApiReady] + " is set");
+                    //        break;
+                    //}
                     //if (uWaitApiReady == WaitObjectReturnValue.WAIT_OBJECT_0)
                     //{ //all APIs set
                     //    _ApiIsReady = true;
                     //    OnApiChangeMessage(true);
                     //    bStop = true;
                     //}
-                } while (!bStop);
+                } while (!bStop || maxTries==0);
             }
             catch (ThreadAbortException ex)
             {

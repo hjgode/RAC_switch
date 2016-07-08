@@ -68,7 +68,7 @@ namespace RAC_switch
             //_profiles = profiles;
             evtStopThreads.Reset(); // clear event
 
-            OnConnecterMessage("connector initialized with profiles: ");
+            OnConnectedMessage("connector initialized with profiles: ");
             try
             {
                 _ssRACapi = new itc_ssapi();
@@ -81,7 +81,7 @@ namespace RAC_switch
             //list profiles and disable all first, only one should be enabled
             foreach (string s in _profiles)
             {
-                OnConnecterMessage("\t" + s);
+                OnConnectedMessage("\t" + s);
                 _ssRACapi.enableProfile(s, false);
             }
             _ssRACapi.enableProfile(_profiles[0], true); //enable primary profile
@@ -153,39 +153,39 @@ namespace RAC_switch
             lock (syncObject)
                 bInsideSwitch=true;
 
-            OnConnecterMessage("DoSwitch() start...");
+            OnConnectedMessage("DoSwitch() start...");
             Logger.WriteLine("DoSwitch() start...");
 
             int iConnectTry = 0;
             //is first profile active?
             string currentProfile = _ssRACapi.getCurrentProfile().sProfileLabel;
             string desiredSSID = _ssRACapi.getCurrentProfile().sSSID;
-            OnConnecterMessage("current profile=" + currentProfile);
+            OnConnectedMessage("current profile=" + currentProfile);
             //is the preferred profile active?
             if (currentProfile == _profiles[0])
             {
-                OnConnecterMessage("Current Profile = First profile");
+                OnConnectedMessage("Current Profile = First profile");
                 if (network._getConnected() == false)
                 { //not connected
-                    OnConnecterMessage("network not connected. Switching to 2nd profile...");
+                    OnConnectedMessage("network not connected. Switching to 2nd profile...");
                     _ssRACapi.enableProfile(_profiles[0], false); //disable first profile
                     _ssRACapi.enableProfile(_profiles[1], true); //enable second profile
                 }
                 else
                 {
-                    OnConnecterMessage("network connected. No profile change.");
+                    OnConnectedMessage("network connected. No profile change.");
                 }
             }
             else if (_ssRACapi.getCurrentProfile().sProfileLabel == _profiles[1])
             {
                 desiredSSID = _ssRACapi._racProfiles[1].sSSID;
-                OnConnecterMessage("Current Profile = Second profile");
+                OnConnectedMessage("Current Profile = Second profile");
                 if ( network._getConnected() == false)
-                    OnConnecterMessage("secondary profile not connected");
+                    OnConnectedMessage("secondary profile not connected");
                 else
-                    OnConnecterMessage("secondary profile connected");
+                    OnConnectedMessage("secondary profile connected");
                 //try first profile, regardless of connect state
-                OnConnecterMessage("Trying first Profile. Switching ...");
+                OnConnectedMessage("Trying first Profile. Switching ...");
                 _ssRACapi.enableProfile(_profiles[1], false); //disable second profile
                 _ssRACapi.enableProfile(_profiles[0], true); //enable first profile
                 desiredSSID = _ssRACapi._racProfiles[0].sSSID;
@@ -209,24 +209,24 @@ namespace RAC_switch
                 //another test for being connected
                 if (network._getConnected() == false)
                 {
-                    OnConnecterMessage("First Profile did not connect. Switching to secondary profile...");
+                    OnConnectedMessage("First Profile did not connect. Switching to secondary profile...");
                     //switch back
                     _ssRACapi.enableProfile(_profiles[0], false); //disable first profile
                     _ssRACapi.enableProfile(_profiles[1], true);  //enable second profile
                 }
                 else
                 {
-                    OnConnecterMessage("primary network connected.");
+                    OnConnectedMessage("primary network connected.");
                 }
             }
             else
             {
-                OnConnecterMessage("Current profile not in list!");
+                OnConnectedMessage("Current profile not in list!");
             }
 
             lock (syncObject)
                 bInsideSwitch = false;
-            OnConnecterMessage("DoSwitch() end.");
+            OnConnectedMessage("DoSwitch() end.");
             Logger.WriteLine("DoSwitch() end.");
         }
 
@@ -242,7 +242,7 @@ namespace RAC_switch
         /// </summary>
         void myWorkerThread()
         {
-            OnConnecterMessage("myWorkerThread start");
+            OnConnectedMessage("myWorkerThread start");
             batterylog2.BatteryStatusEx batteryStatus=new batterylog2.BatteryStatusEx();
             bool isDocked = batteryStatus._isACpowered;
             bool stopp = false;
@@ -256,31 +256,31 @@ namespace RAC_switch
                     switch (indx)
                     {
                         case 0:
-                            OnConnecterMessage("myWorkerThread stopp signaled");
+                            OnConnectedMessage("myWorkerThread stopp signaled");
                             stopp = true;
                             _bStopThread = true;
                             break;
                         case 1: //timer
-                            OnConnecterMessage("myWorkerThread timer signaled");
-                            OnConnecterMessage("current profile: " + _ssRACapi.getCurrentProfile().sProfileLabel);
+                            OnConnectedMessage("myWorkerThread timer signaled");
+                            OnConnectedMessage("current profile: " + _ssRACapi.getCurrentProfile().sProfileLabel);
                             break;
                         case 2: //disconnect
                             if(_bswitchOnDisconnect){
-                                OnConnecterMessage("myWorkerThread disconnect signaled");
+                                OnConnectedMessage("myWorkerThread disconnect signaled");
                                 doSwitch();
                             }
                             break;
                         case 3: //PowerOn
                             if (_bcheckOnResume)
                             {
-                                OnConnecterMessage("myWorkerThread powerOn signaled");
+                                OnConnectedMessage("myWorkerThread powerOn signaled");
                                 doSwitch();
                             }
                             break;
                         case 4: //undocked
                             if (_bcheckOnUndock)
                             {
-                                OnConnecterMessage("myWorkerThread undocked signaled");
+                                OnConnectedMessage("myWorkerThread undocked signaled");
                                 //try primary profile
                                 //try secondary profile
                                 doSwitch();
@@ -301,9 +301,9 @@ namespace RAC_switch
             }
             catch (Exception ex)
             {
-                OnConnecterMessage("myWorkerThread Exception: " + ex.Message);
+                OnConnectedMessage("myWorkerThread Exception: " + ex.Message);
             }
-            OnConnecterMessage("myWorkerThread ended");
+            OnConnectedMessage("myWorkerThread ended");
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace RAC_switch
         /// </summary>
         void connectWatchThread()
         {
-            OnConnecterMessage("connectWatchThread starting");
+            OnConnectedMessage("connectWatchThread starting");
             bool newState, oldState = true;
             WaitHandle[] handles = new WaitHandle[] { evtStopThreads };
             int indx = -1;
@@ -334,7 +334,7 @@ namespace RAC_switch
                     {
                         case 0:
                             stopp = true;
-                            OnConnecterMessage("connectWatchThread stopp signaled");
+                            OnConnectedMessage("connectWatchThread stopp signaled");
                             break;
                         case EventWaitHandle.WAIT_TIMEOUT:
                             lock (syncObject)
@@ -343,27 +343,27 @@ namespace RAC_switch
                             }
                             if (bDoNotCheck)
                             {
-                                OnConnecterMessage("connectWatchThread does not check!");
+                                OnConnectedMessage("connectWatchThread does not check!");
                                 break;
                             }
                             //OnConnecterMessage("connectWatchThread WAIT_TIMEOUT");
                             bRadioPower = _ssRACapi.getRadioEnabled();
                             if (!bRadioPower){
-                                OnConnecterMessage("Radio is disabled!");
+                                OnConnectedMessage("Radio is disabled!");
                                 break;
                             }
                             associatedAP=wifi.getAssociatedAP();
                             //TODO
-                            OnConnecterMessage("connectWatchThread: associatedAP AP=" + associatedAP);
+                            OnConnectedMessage("connectWatchThread: associatedAP AP=" + associatedAP);
                             if (associatedAP == this._ssRACapi._racProfiles[0].sSSID)
                             {
-                                OnConnecterMessage("connectWatchThread: Radio already connected to preferred profile " + _ssRACapi._racProfiles[0].sProfileLabel);
+                                OnConnectedMessage("connectWatchThread: Radio already connected to preferred profile " + _ssRACapi._racProfiles[0].sProfileLabel);
                                 break;
                             }
                             newState = network._getConnected();
                             if (!newState)
                             {
-                                OnConnecterMessage("connectWatchThread: fire Disconnect event");
+                                OnConnectedMessage("connectWatchThread: fire Disconnect event");
                                 //fire event
                                 evtDisconnect.Set();
                             }
@@ -378,9 +378,9 @@ namespace RAC_switch
             }
             catch (Exception ex)
             {
-                OnConnecterMessage("connectWatchThread Exception: " + ex.Message);
+                OnConnectedMessage("connectWatchThread Exception: " + ex.Message);
             }
-            OnConnecterMessage("connectWatchThread ended");
+            OnConnectedMessage("connectWatchThread ended");
         }
 
         /// <summary>
@@ -388,7 +388,7 @@ namespace RAC_switch
         /// </summary>
         void timerThread()
         {
-            OnConnecterMessage("timerThread started");
+            OnConnectedMessage("timerThread started");
             EventWaitHandle[] handles=new EventWaitHandle[]{evtStopThreads};
             int indx = -1;
             bool stopp = false;
@@ -401,13 +401,13 @@ namespace RAC_switch
                     {
                         case 0:
                             stopp = true;
-                            OnConnecterMessage("timerThread stopp signaled");
+                            OnConnectedMessage("timerThread stopp signaled");
                             break;
                         case EventWaitHandle.WAIT_FAILED:
-                            OnConnecterMessage("timerThread WAIT_FAILED");
+                            OnConnectedMessage("timerThread WAIT_FAILED");
                             break;
                         case EventWaitHandle.WAIT_TIMEOUT:
-                            OnConnecterMessage("timerThread fires evtTime");
+                            OnConnectedMessage("timerThread fires evtTime");
                             evtTime.Set();
                             //Thread.Sleep(1000);
                             //evtTime.Reset();
@@ -421,9 +421,9 @@ namespace RAC_switch
             }
             catch (Exception ex)
             {
-                OnConnecterMessage("timerThread Exception: " + ex.Message);
+                OnConnectedMessage("timerThread Exception: " + ex.Message);
             }
-            OnConnecterMessage("timerThread ended");
+            OnConnectedMessage("timerThread ended");
         }
 
         #region EvenHandling
@@ -440,7 +440,7 @@ namespace RAC_switch
                 message = msg;
             }
         }
-        void OnConnecterMessage(string msg)
+        void OnConnectedMessage(string msg)
         {
             ConnectorEventArgs e = new ConnectorEventArgs(msg);
             Logger.WriteLine(e.message);

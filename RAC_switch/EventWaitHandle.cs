@@ -74,17 +74,55 @@ namespace RAC_switch
 
             return NativeMethods.WaitForMultipleObjects(handles.Length, handles, false, millisecondsTimeout);
         }
-        [Obsolete("NOT SUPPORTED on Windows CE")]
-        public static int WaitAll(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext)
+
+        //[Obsolete("NOT SUPPORTED on Windows CE")]
+        public static bool WaitAll(WaitHandle[] waitHandles, int secondsTimeout, bool exitContext)
         {
-            throw new NotSupportedException("WaitForMultipleObjects with WaitAll is NOT SUPPORTED on Windows CE");
             IntPtr[] handles = new IntPtr[waitHandles.Length];
             for (int i = 0; i < handles.Length; i++)
             {
                 handles[i] = waitHandles[i].Handle;
             }
+            int maxTries = secondsTimeout;// 30;
+            bool bAllSet = false;
+            do
+            {
+                int iWaitResult = NativeMethods.WaitForMultipleObjects(handles.Length, handles, false, 1000);
+                //WaitForMultipleObjects will be released for any handle being signaled
+                //the call will release for the first set event in the array and this will repeat
+                //need to iterate thru all events to check if all events are set.
+                //iWaitResult will indicate the position of the signaled event inside the array
+                if (iWaitResult == WAIT_FAILED)
+                    System.Diagnostics.Debug.WriteLine("WaitAll FAIL");
+                if (iWaitResult == WAIT_TIMEOUT)
+                    System.Diagnostics.Debug.WriteLine("WaitAll timed out");
 
-            return NativeMethods.WaitForMultipleObjects(handles.Length, handles, true, millisecondsTimeout);
+                if (iWaitResult < handles.Length)
+                {
+                    System.Diagnostics.Debug.WriteLine("WaitAll released for event handle " + handles[iWaitResult].ToString());
+                    //create temp List
+                    List<IntPtr> temp = new List<IntPtr>(handles);
+                    //remove handle from List
+                    System.Diagnostics.Debug.WriteLine("WaitAll removed signaled event handle");
+                    temp.Remove(handles[iWaitResult]);
+                    //convert List back to array
+                    handles = temp.ToArray();
+                    System.Diagnostics.Debug.WriteLine("WaitAll: num of remaining event handles: "+temp.Count.ToString());
+                    if (temp.Count == 0)
+                    {
+                        bAllSet = true;
+                        System.Diagnostics.Debug.WriteLine("WaitAll all event handles signaled");
+                        break;
+                    }
+                }
+                maxTries--;
+            } while (handles.Length > 0 && maxTries!=0 && bAllSet==false);
+            if(maxTries==0)
+                System.Diagnostics.Debug.WriteLine("WaitAll timed out - not all event handles signaled");
+            return bAllSet;
+
+            //throw new NotSupportedException("WaitForMultipleObjects with fWaitAll=true is NOT SUPPORTED on Windows CE");
+            //return NativeMethods.WaitForMultipleObjects(handles.Length, handles, true, millisecondsTimeout);
         }
 
 

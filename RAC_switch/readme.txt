@@ -76,4 +76,11 @@ History
 		added setting switchOnDisconnect, was enabled by default
 		added settings checkConnectIP
 			if checkConnectIP is true, the app waits for a valid local IP
-			if checkConnectIP is false, the app will only check if desired SSID is associated			
+			if checkConnectIP is false, the app will only check if desired SSID is associated
+		v003 was never published
+	v004
+		added code to wait for all APIs ready. This will prevent exceptions if rac_switch is
+		started with a link from \Windows\Startup
+	v005
+		added try/catch around _checkConnectIP in MobileConfiguration.cs. This will avoid exception 
+		but one does not know that the app.config is wrong!

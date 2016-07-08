@@ -59,7 +59,7 @@ namespace RAC_switch
             
             addLog("Network start: " + (network._getConnected()?"connected":"disconnected"));
 
-            timerMinimize.Interval = 1000;
+            timerMinimize.Interval = 5000;
             timerMinimize.Tick += new EventHandler(timerMinimize_Tick);
             timerMinimize.Enabled = true;
 
