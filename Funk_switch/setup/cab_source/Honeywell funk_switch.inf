@@ -1,0 +1,67 @@
+;
+; ???????:
+;
+;      WinCE CAB Manager 3, 0, 0, 22
+;      Copyright (c) 2001-2008 OCP Software, Inc.
+;      ??????
+;
+; ???????:
+;
+;      http://www.ocpsoftware.com
+;
+
+[SOURCE FILE]
+Name=rac_switch.cab
+Path=D:\svn\git\RAC_switch\FUNK_switch\setup\funk_switch.cab
+AllowUninstall=TRUE
+
+[Version]
+Signature="$Chicago$"
+CESignature="$Windows CE$"
+Provider="Honeywell"
+
+[CEStrings]
+AppName="rac_switch"
+InstallDir="%CE1%\Honeywell\funk_switch"
+
+[CEDevice]
+ProcessorType=0
+VersionMin=0.0
+VersionMax=0.0
+BuildMin=0
+BuildMax=0
+
+[SourceDisksNames]
+1=,Source1,,"[INSTALLDIR]"
+
+[SourceDisksFiles]
+"App.Config"=1
+"intermec.devicemanagement.smartsystem.itcssapi.dll"=1
+"opennetcf.dll"=1
+"opennetcf.windowsce.dll"=1
+"opennetcf.windowsce.messaging.dll"=1
+"FUNK_switch.exe"=1
+
+[CopyFiles1]
+"App.Config",,,0x00000001
+"intermec.devicemanagement.smartsystem.itcssapi.dll",,,0x00000001
+"opennetcf.dll",,,0x00000001
+"opennetcf.windowsce.dll",,,0x00000001
+"opennetcf.windowsce.messaging.dll",,,0x00000001
+"FUNK_switch.exe",,,0x00000001
+
+[CEShortcuts1]
+"Funk_Switch.lnk",0,"FUNK_switch.exe"
+
+[CEShortcuts2]
+"Funk_Switch.lnk",0,"FUNK_switch.exe"
+
+[DestinationDirs]
+CopyFiles1=0,"%InstallDir%"
+CEShortcuts1=0,"\Windows\StartUp"
+CEShortcuts2=0,"%CE11%"
+
+[DefaultInstall]
+CopyFiles=CopyFiles1
+CEShortcuts=CEShortcuts1,CEShortcuts2
+

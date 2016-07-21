@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<DevInfo Action="Set" Persist="true">
+ <Subsystem Name="Communications">
+  <Group Name="802.11 Radio">
+   <Field Name="Radio Enabled">1</Field> 
+  </Group>
+ </Subsystem>
+ <Subsystem Name="Funk Security">
+ <Field Name="ActiveProfile">Profile_2</Field>
+  <Group Name="Profile" Instance="Profile_1">
+   <Field Name="ProfileLabel">Profile_1</Field> 
+   <Field Name="SSID">Fuhrpark_PDA</Field> 
+   <Field Name="Association">RSN</Field> 
+   <Field Name="Encryption">AES</Field> 
+   <Field Name="PreSharedKey" Encrypt="binary.base64">dzcrvPwmAWjcJAOO75RQEQ==</Field> 
+  </Group>
+  <Group Name="Profile" Instance="Profile_2">
+   <Field Name="ProfileLabel">Profile_2</Field> 
+   <Field Name="SSID">MI-RC.51</Field>
+   <Field Name="Association">Open</Field> 
+   <Field Name="Encryption">None</Field>  
+  </Group>
+ </Subsystem>
+</DevInfo>
