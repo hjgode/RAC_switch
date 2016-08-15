@@ -62,33 +62,67 @@ namespace Funk_switch
             }
         }
 
+
         public static bool isFunkClient()
         {
-            if (_ssAPI == null)
-                _ssAPI = new ITCSSApi();
+            /*
+            [HKEY_LOCAL_MACHINE\Drivers\BuiltIn\NDISUIO]
+            "Dll"="zniczio.dll" ; for FUNK active
+            "Dll"="ndisuio.dll" ; for ZeroConfig active
+             * or
+            [HKEY_LOCAL_MACHINE\Drivers\BuiltIn\ZeroConfig]
+            "Dll"="WZCSVCxxx.dll" ; for FUNK active
+            "Dll"="WZCSVC.dll" ; for ZeroConfig active
+             */
+            int maxtry = 5;
+            int currtry=0;
             bool bRet = false;
-            const string isFunkXML =
-                "<Subsystem Name=\"Communications\">\r\n" +
-                "  <Group Name=\"802.11 Radio\">\r\n" +
-                "     <Field Name=\"ZeroConfig\"></Field> \r\n" +
-                "  </Group>\r\n" +
-                "</Subsystem>\r\n";
-            StringBuilder sb = new StringBuilder(1024);
-            int aSize = 1024;
-            try
+            Logger.WriteLine("isFunkClient() ...");
+            do
             {
-                if (_ssAPI.Get(isFunkXML, sb, ref aSize, 2000) == ITCSSErrors.E_SS_SUCCESS)
+                try
                 {
-                    int iPos = sb.ToString().IndexOf("\"ZeroConfig\">") + "\"ZeroConfig\">".Length;
-                    string sValue = sb.ToString().Substring(iPos, sb.ToString().IndexOf("<"));
-                    if (sValue.Equals("Off", StringComparison.OrdinalIgnoreCase))
+                    currtry++;
+                    Logger.WriteLine("isFunkClient(): attempt "+ currtry.ToString());
+                    string ZeroConfigDll = (string) Registry.LocalMachine.OpenSubKey(@"Drivers\BuiltIn\ZeroConfig", false).GetValue("Dll", "");
+                    if ("WZCSVCxxx.dll".Equals(ZeroConfigDll, StringComparison.OrdinalIgnoreCase))
+                    {
                         bRet = true;
+                        break;
+                    }
+                    //using SSAPI is a mess on warmboot!
+                    //if (_ssAPI == null)
+                    //{
+                    //    Logger.WriteLine("isFunkClient(): new ITCSSApi()...");
+                    //    _ssAPI = new ITCSSApi();
+                    //}
+                    //if (_ssAPI != null)
+                    //{
+                    //    Logger.WriteLine("isFunkClient(): ITCSSApi() loaded");
+                    //    const string isFunkXML =
+                    //         "<Subsystem Name=\"Communications\">\r\n" +
+                    //         "  <Group Name=\"802.11 Radio\">\r\n" +
+                    //         "     <Field Name=\"ZeroConfig\"></Field> \r\n" +
+                    //         "  </Group>\r\n" +
+                    //         "</Subsystem>\r\n";
+                    //    StringBuilder sb = new StringBuilder(1024);
+                    //    int aSize = 1024;
+                    //    if (_ssAPI.Get(isFunkXML, sb, ref aSize, 2000) == ITCSSErrors.E_SS_SUCCESS)
+                    //    {
+                    //        int iPos = sb.ToString().IndexOf("\"ZeroConfig\">") + "\"ZeroConfig\">".Length;
+                    //        string sValue = sb.ToString().Substring(iPos, sb.ToString().IndexOf("<"));
+                    //        if (sValue.Equals("Off", StringComparison.OrdinalIgnoreCase))
+                    //            bRet = true;
+                    //        break;
+                    //    }
+                    //}
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteLine("isFunkClient exception: " + ex.Message);
-            }
+                catch (Exception ex)
+                {
+                    Logger.WriteLine("isFunkClient exception: " + ex.Message);
+                }
+                System.Threading.Thread.Sleep(5000);
+            } while (currtry < maxtry);
             return bRet;
         }
 
@@ -110,16 +144,16 @@ namespace Funk_switch
             return new Profile("", "", "", "1");
         }
 
-        public bool setCurrentProfile(string sLabel)
+        public bool setCurrentProfile(string sInstanceName)
         {
-            if (getCurrentProfile().sProfileLabel == sLabel)
+            if (getCurrentProfile().sProfileLabel == sInstanceName)
                 return true;
-            Logger.WriteLine("enableProfile: " + sLabel);
+            Logger.WriteLine("enableProfile: " + sInstanceName);
             int iRet = 0;
             StringBuilder sb = new StringBuilder(1024);
             int dSize = 1024;
             //set profile_x for profile with profileLabel
-            string sXML = String.Format(setFUNKprofileXml, sLabel); //enable = 1, disabled=0, the xml say disabled instead of enabled !!!
+            string sXML = String.Format(setFUNKprofileXml, sInstanceName); //enable = 1, disabled=0, the xml say disabled instead of enabled !!!
             Logger.WriteLine(sXML);
             uint uError = _ssAPI.Set(sXML, sb, ref dSize, 2000);
             if (uError != ITCSSErrors.E_SS_SUCCESS)

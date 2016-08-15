@@ -146,6 +146,40 @@ namespace Funk_switch
             }
         }
 
+        bool isSSAPIready()
+        {
+            Logger.WriteLine("isSSAPIready()");
+            //put a file in \SmartSystems\SSConfigDir and wait until it is renamed or removed
+            string SSConfigDir = @"\SmartSystems\SSConfigDir\";
+            string ssConfigFile = SSConfigDir+"enablelog.xml";
+            string sEnableLogging = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                                    "<DevInfo Action=\"Set\">\n" +
+                                    "<Subsystem Name=\"SS_Client\">\n" +
+                                    "	<Group Name=\"Registry\"  Instance=\"Software\\Intermec\\SSClient\">\n" +
+                                    "		<Field Name=\"SaveCfgFiles\">1</Field>\n" +
+                                    "		<Field Name=\"Type\">REG_SZ</Field>\n" +
+                                    "	</Group>\n" +
+                                    "</Subsystem>\n" +
+                                    "</DevInfo>\n";
+            using(System.IO.StreamWriter writer=new System.IO.StreamWriter(ssConfigFile)){
+                writer.Write(sEnableLogging);
+                writer.Flush();
+            }
+            bool removed=false; int tries=0;
+            do{
+                string[] files = System.IO.Directory.GetFiles(SSConfigDir);
+                if(!(files.ToList().Contains(ssConfigFile)))
+                {
+                    removed=true;
+                    break;
+                }
+                System.Threading.Thread.Sleep(1000);
+                tries++;
+            }while(!removed && tries<30);
+            Logger.WriteLine("isSSAPIready() returns " + removed.ToString());
+            return removed;
+        }
+
         void myWorkerThread()
         {
             Logger.WriteLine("WinApiReady-myWorkerThread starting...");
@@ -158,7 +192,8 @@ namespace Funk_switch
                     bool bWaitAll = EventWaitHandle.WaitAll(hEvents, 30, false); //blocks up to 30 seconds
                     if (bWaitAll)
                     {
-                        _ApiIsReady = true;
+                        if(isSSAPIready() && isSSAPIready())
+                            _ApiIsReady = true;
                         bStop = true;
                         OnApiChangeMessage(true);
                     }

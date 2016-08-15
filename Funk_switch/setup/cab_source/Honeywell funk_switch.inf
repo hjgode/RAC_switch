@@ -37,6 +37,7 @@ BuildMax=0
 [SourceDisksFiles]
 "App.Config"=1
 "intermec.devicemanagement.smartsystem.itcssapi.dll"=1
+"Intermec.Communication.WLAN.80211api_net.dll"=1
 "opennetcf.dll"=1
 "opennetcf.windowsce.dll"=1
 "opennetcf.windowsce.messaging.dll"=1
@@ -45,6 +46,7 @@ BuildMax=0
 [CopyFiles1]
 "App.Config",,,0x00000001
 "intermec.devicemanagement.smartsystem.itcssapi.dll",,,0x00000001
+"Intermec.Communication.WLAN.80211api_net.dll",,,0x00000001
 "opennetcf.dll",,,0x00000001
 "opennetcf.windowsce.dll",,,0x00000001
 "opennetcf.windowsce.messaging.dll",,,0x00000001

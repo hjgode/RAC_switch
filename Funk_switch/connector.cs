@@ -103,6 +103,8 @@ namespace Funk_switch
 
             _PowerMessages = new PowerMessages();
             _PowerMessages.powerChangedEvent += new PowerMessages.powerChangeEventHandler(_PowerMessages_powerChangedEvent);
+
+            OnConnectedMessage("connector started");
         }
 
         void _PowerMessages_powerChangedEvent(object sender, PowerMessages.PowerEventArgs args)
@@ -123,14 +125,27 @@ namespace Funk_switch
             evtStopThreads.Set(); // stop all threads
             _bStopThread = true;
             Thread.Sleep(5000);
-            if (_workThread != null) 
-                _workThread.Abort();
+            try
+            {
+                if (_workThread != null)
+                    _workThread.Abort();
+            }
+            catch (Exception) { }
+            try{
             if (_connectThread != null)
                 _connectThread.Abort();
+            }
+            catch (Exception) { }
+            try{
             if (_timerThread != null)
                 _timerThread.Abort();
+            }
+            catch (Exception) { }
+            try{
             if (_PowerSourceMessages != null)
                 _PowerSourceMessages.Dispose();
+            }
+            catch (Exception) { }
             evtStopThreads.Reset();
         }
 

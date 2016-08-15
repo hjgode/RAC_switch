@@ -66,3 +66,9 @@ History
 		changed code to check association to Intermec WLAN API
 		removed RAC related code
 		removed OpenNetCF.Net related code and reference (causes Wifi Radio Power Off!)
+
+	v002
+		fixed issues when started via StartUp (ssAPI not ready)
+		changed isFunkClient to use registry
+		changed WinAPIready to look for SSAPI too (using a trick)
+		added Intermec.Communication.WLAN.80211api_net.dll to cab installation

@@ -14,7 +14,7 @@ namespace Funk_switch
         wifi _wifi;
         System.Windows.Forms.Timer timer1;
         network _network;
-        bool isRAC = false;
+        bool isFUNK = false;
 
         connector _connector;
 
@@ -37,7 +37,7 @@ namespace Funk_switch
             try
             {
                 _wifi = new wifi();
-                isRAC = true;
+                isFUNK = true;
                 MobileConfiguration myConfig = new MobileConfiguration();
                 button1.Text = myConfig._profile1;
                 button2.Text = myConfig._profile2;
@@ -50,21 +50,26 @@ namespace Funk_switch
             {
                 MessageBox.Show(ex.Message);
             }
-            if (isRAC)
+
+            if (isFUNK)
             {
                 btnStart.Enabled = true;
+                _network = new network();
+
+                addLog("Network start: " + (network._getConnected() ? "connected" : "disconnected"));
+
+                timerMinimize.Interval = 5000;
+                timerMinimize.Tick += new EventHandler(timerMinimize_Tick);
+                timerMinimize.Enabled = true;
+
+                startConnector();
+                updateButtons();
             }
-
-            _network = new network();
-            
-            addLog("Network start: " + (network._getConnected()?"connected":"disconnected"));
-
-            timerMinimize.Interval = 5000;
-            timerMinimize.Tick += new EventHandler(timerMinimize_Tick);
-            timerMinimize.Enabled = true;
-
-            startConnector();
-            updateButtons();
+            else
+            {
+                MessageBox.Show("Current security client is not supported");
+                Logger.WriteLine("Current security client is not supported");
+            }
 
             //_network.networkChangedEvent += new network.networkChangeEventHandler(_network_networkChangedEvent);
         }
@@ -93,6 +98,7 @@ namespace Funk_switch
                 addLog("starting connector...");
                 _connector = new connector();
                 _connector.connectorChangedEvent += new connector.connectorChangeEventHandler(_connector_connectorChangedEvent);
+                addLog("connector started");
             }
             catch (NotSupportedException ex)
             {
@@ -264,7 +270,7 @@ namespace Funk_switch
 
         private void mnuAbout_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("RAC_Switch version " + Logger.getVersion());
+            MessageBox.Show("FUNK_Switch version " + Logger.getVersion());
         }
 
     }

@@ -10,7 +10,7 @@ namespace Funk_switch
     public class Logger
     {
         public static bool bEnableLogging = true;
-        public static string sLogFile="\\RAC_switch.log.txt";
+        public static string sLogFile="\\FUNK_switch.log.txt";
         public static bool bFirstWrite = true;
 
         public static void WriteLine(string s)
@@ -32,13 +32,13 @@ namespace Funk_switch
                     using(StreamWriter sw = new StreamWriter(sLogFile, true)){
                         if (bFirstWrite)
                         {
-                            sw.WriteLine("#### rac_switch "+getVersion()+" ####");
+                            sw.WriteLine("#### funk_switch "+getVersion()+" ####");
                             bFirstWrite = false;
                         }
                         sw.WriteLine(timestamp + "\t" + s);
                     }
                 }catch(Exception ex){
-                    System.Diagnostics.Debug.WriteLine("RAC_switch Exception: " + s + "\r\n" +ex.Message);
+                    System.Diagnostics.Debug.WriteLine("FUNK_switch Exception: " + s + "\r\n" +ex.Message);
                 }
             }
         }
