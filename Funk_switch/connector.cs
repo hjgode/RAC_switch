@@ -173,7 +173,8 @@ namespace Funk_switch
 
             int iConnectTry = 0;
             //is first profile active?
-            string currentProfile = _wifi.getCurrentProfile().sProfileLabel;
+            //USES instance or regKey name!
+            string currentProfile = _wifi.getCurrentProfile().sProfileRekKey;
             string desiredSSID = _wifi.getCurrentProfile().sSSID;
             OnConnectedMessage("current profile=" + currentProfile);
             //is the preferred profile active?
@@ -190,9 +191,10 @@ namespace Funk_switch
                     OnConnectedMessage("network connected. No profile change.");
                 }
             }
-            else if (_wifi.getCurrentProfile().sProfileLabel == _profiles[1])
+            else if (_wifi.getCurrentProfile().sProfileRekKey == _profiles[1])
             {
-                desiredSSID = _wifi.wlanProfiles[1].sSSID;
+                //TODO: do not use an INDEX use the names as in App.Config
+                desiredSSID = _wifi.SSIDsecondary;
                 OnConnectedMessage("Current Profile = Second profile");
                 if ( network._getConnected() == false)
                     OnConnectedMessage("secondary profile not connected");
@@ -201,7 +203,9 @@ namespace Funk_switch
                 //try first profile, regardless of connect state
                 OnConnectedMessage("Trying first Profile. Switching ...");
                 _wifi.setProfile(_profiles[0]); //enable first profile
-                desiredSSID = _wifi.wlanProfiles[0].sSSID;
+
+                desiredSSID = _wifi.SSIDprimary;
+
                 iConnectTry = 0;
                 //try for 40 seconds or so
                 while (!_bStopThread && (iConnectTry < _iSwitchTimeout))
@@ -274,7 +278,7 @@ namespace Funk_switch
                             break;
                         case 1: //timer
                             OnConnectedMessage("myWorkerThread timer signaled");
-                            OnConnectedMessage("current profile: " + _wifi.getCurrentProfile().sProfileLabel);
+                            OnConnectedMessage("current profile: " + _wifi.getCurrentProfile().sProfileRekKey);
                             break;
                         case 2: //disconnect
                             if(_bswitchOnDisconnect){

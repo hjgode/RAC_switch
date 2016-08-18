@@ -19,6 +19,8 @@ namespace Funk_switch
         {
             get { return _regKey; }
         }
+
+        [Obsolete("Do NOT USE!")]
         /// <summary>
         /// The label used for the profile
         /// </summary>

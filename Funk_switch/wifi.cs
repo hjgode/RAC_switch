@@ -14,6 +14,8 @@ namespace Funk_switch
 
         List<string> preferedSSIDs = new List<string>();
 
+        MobileConfiguration _myConfig = new MobileConfiguration();
+
         /// <summary>
         /// not used with  FUNK
         /// </summary>
@@ -64,6 +66,10 @@ namespace Funk_switch
             foreach (Profile R in _profiles.profiles)
             {
                 preferedSSIDs.Add(R.sSSID);
+                if (R.sProfileRekKey == _myConfig._profile1)
+                    _SSIDprimary = R.sSSID;
+                if (R.sProfileRekKey == _myConfig._profile2)
+                    _SSIDseconday = R.sSSID;
                 //preferedSSIDs.Add("SUPPORT");
                 //preferedSSIDs.Add("INTERMEC");
             }
@@ -154,6 +160,17 @@ namespace Funk_switch
             {
                 return _profiles.profiles;
             }
+        }
+
+        string _SSIDprimary = "Intermec";
+        public string SSIDprimary
+        {
+            get { return _SSIDprimary; }
+        }
+        string _SSIDseconday = "Intermec";
+        public string SSIDsecondary
+        {
+            get { return _SSIDseconday; }
         }
 
         public static bool isAssociated(string ssid)

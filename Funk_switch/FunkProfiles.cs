@@ -126,12 +126,25 @@ namespace Funk_switch
             return bRet;
         }
 
+        /// <summary>
+        /// get the current active profile by the registered name
+        /// </summary>
+        /// <returns>Profile name as used in the registry
+        /// ie: Profile_1, Profile_2 etc.</returns>
         public Profile getCurrentProfile()
         {
             if (_profiles.Count == 0)
                 readProfiles();
            
-            int currentProfileInt = (int)Registry.GetValue(subKey, "ActiveProfile", -1);
+            int currentProfileInt = (int)Registry.GetValue(subKey, "ActiveProfile", -1);  //gives a number that points to the profile name
+            /*[HKEY_CURRENT_USER\Software\Intermec\80211Conf\Profiles]
+            "0"="Profile_1"
+            "1"="Profile_2"
+            "2"="Profile_3"
+            "3"="Profile_4"
+            "4"="WAPI Profile"
+            "ActiveProfile"=dword:00000000
+            */
             string currentProfileString = (string)Registry.GetValue(subKey, currentProfileInt.ToString(), "");
 
             foreach (Profile p in _profiles)
@@ -146,7 +159,7 @@ namespace Funk_switch
 
         public bool setCurrentProfile(string sInstanceName)
         {
-            if (getCurrentProfile().sProfileLabel == sInstanceName)
+            if (getCurrentProfile().sProfileRekKey == sInstanceName)
                 return true;
             Logger.WriteLine("enableProfile: " + sInstanceName);
             int iRet = 0;

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DevInfo Action="Set">
+	<Subsystem Name="Funk Security">
+		<Field Name="ActiveProfile">Profile_1</Field>
+		<Group Name="Profile" Instance="Profile_1">
+			<Field Name="ProfileLabel">EDK_LOG</Field>
+			<Field Name="NetworkType">Infrastructure</Field>
+			<Field Name="DSChannel">3</Field>
+			<Field Name="SSID">EDK_LOG</Field>
+			<Field Name="PSMode">Enabled(Fast PSP)</Field>
+			<Field Name="8021x">None</Field>
+			<Field Name="Association">RSN</Field>
+			<Field Name="Encryption">AES</Field>
+			<Field Name="PreSharedKey" >1234567890123</Field>
+			<Field Name="DefaultKeyID">1</Field>
+			<Field Name="Key1" Encrypt="binary.base64"></Field>
+			<Field Name="Key2" Encrypt="binary.base64"></Field>
+			<Field Name="Key3" Encrypt="binary.base64"></Field>
+			<Field Name="Key4" Encrypt="binary.base64"></Field>
+			<Field Name="PasswordPrompt">Disabled</Field>
+			<Field Name="UserName">anonymous</Field>
+			<Field Name="UserPassword">******</Field>
+			<Field Name="InnerAuthenticationTTLS">MS-Chapv2</Field>
+			<Field Name="TTLSOutername"></Field>
+			<Field Name="InnerEAP">EAP/MD5</Field>
+			<Field Name="InnerAuthenticationPEAP">EAP/MS-Chapv2</Field>
+			<Field Name="InnerAuthenticationFAST">EAP/Token Card</Field>
+			<Field Name="SubjectName"></Field>
+			<Field Name="ValidateServerCert">No</Field>
+			<Field Name="CN1"></Field>
+			<Field Name="CN2"></Field>
+			<Field Name="MixedCell">On</Field>
+			<Field Name="CCKM">Off</Field>
+			<Field Name="AutoProvision">On</Field>
+			<Field Name="NewPACPrompt">Off</Field>
+			<Field Name="ReprovisionPrompt">Off</Field>
+			<Field Name="PACAuthenticateProvisioning">Optional</Field>
+			<Field Name="Logging">Off</Field>
+		</Group>
+		<Group Name="Profile" Instance="Profile_2">
+			<Field Name="ProfileLabel">MI-RC.51</Field>
+			<Field Name="NetworkType">Infrastructure</Field>
+			<Field Name="DSChannel">3</Field>
+			<Field Name="SSID">MI-RC.51</Field>
+			<Field Name="PSMode">Enabled(Fast PSP)</Field>
+			<Field Name="8021x">None</Field>
+			<Field Name="Association">Open</Field>
+			<Field Name="Encryption">None</Field>
+			<Field Name="PreSharedKey" Encrypt="binary.base64"></Field>
+			<Field Name="DefaultKeyID">1</Field>
+			<Field Name="Key1" Encrypt="binary.base64"></Field>
+			<Field Name="Key2" Encrypt="binary.base64"></Field>
+			<Field Name="Key3" Encrypt="binary.base64"></Field>
+			<Field Name="Key4" Encrypt="binary.base64"></Field>
+			<Field Name="PasswordPrompt">Disabled</Field>
+			<Field Name="UserName">anonymous</Field>
+			<Field Name="UserPassword">******</Field>
+			<Field Name="InnerAuthenticationTTLS">MS-Chapv2</Field>
+			<Field Name="TTLSOutername"></Field>
+			<Field Name="InnerEAP">EAP/MD5</Field>
+			<Field Name="InnerAuthenticationPEAP">EAP/MS-Chapv2</Field>
+			<Field Name="InnerAuthenticationFAST">EAP/Token Card</Field>
+			<Field Name="SubjectName"></Field>
+			<Field Name="ValidateServerCert">No</Field>
+			<Field Name="CN1"></Field>
+			<Field Name="CN2"></Field>
+			<Field Name="MixedCell">On</Field>
+			<Field Name="CCKM">Off</Field>
+			<Field Name="AutoProvision">On</Field>
+			<Field Name="NewPACPrompt">Off</Field>
+			<Field Name="ReprovisionPrompt">Off</Field>
+			<Field Name="PACAuthenticateProvisioning">Optional</Field>
+			<Field Name="Logging">Off</Field>
+		</Group>
+	</Subsystem>
+</DevInfo> 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DevInfo Action="Set">
+<Subsystem Name="SS_Client">
+	<Group Name="Registry"  Instance="Software\Intermec\SSClient">
+		<Field Name="SaveCfgFiles">1</Field>
+		<Field Name="Type">REG_SZ</Field>
+	</Group>
+</Subsystem>
+</DevInfo>

@@ -28,8 +28,8 @@ namespace Funk_switch
             }
             public int Compare(Profile x, Profile y)
             {
-                int xi = orderedStrings.IndexOf(x.sProfileLabel); // -1 if not found!
-                int yi = orderedStrings.IndexOf(y.sProfileLabel);
+                int xi = orderedStrings.IndexOf(x.sProfileRekKey); // -1 if not found!
+                int yi = orderedStrings.IndexOf(y.sProfileRekKey);
                 if (xi > yi)
                     return 1;
                 if (xi < yi)
