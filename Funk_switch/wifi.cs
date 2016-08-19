@@ -66,9 +66,9 @@ namespace Funk_switch
             foreach (Profile R in _profiles.profiles)
             {
                 preferedSSIDs.Add(R.sSSID);
-                if (R.sProfileRekKey == _myConfig._profile1)
+                if (R.sProfileRegKey == _myConfig._profile1)
                     _SSIDprimary = R.sSSID;
-                if (R.sProfileRekKey == _myConfig._profile2)
+                if (R.sProfileRegKey == _myConfig._profile2)
                     _SSIDseconday = R.sSSID;
                 //preferedSSIDs.Add("SUPPORT");
                 //preferedSSIDs.Add("INTERMEC");
@@ -151,7 +151,10 @@ namespace Funk_switch
 
         public int setProfile(string sProfile)
         {
-            return _profiles.setCurrentProfile(sProfile)?0:1;
+            if (_profiles.setCurrentProfile(sProfile))
+                return 1;
+            else
+                return 0;
         }
 
         public List<Profile> wlanProfiles
@@ -163,11 +166,17 @@ namespace Funk_switch
         }
 
         string _SSIDprimary = "Intermec";
+        /// <summary>
+        /// return the SSID for the primary Profile
+        /// </summary>
         public string SSIDprimary
         {
             get { return _SSIDprimary; }
         }
         string _SSIDseconday = "Intermec";
+        /// <summary>
+        /// return the SSID for the secondary Profile
+        /// </summary>
         public string SSIDsecondary
         {
             get { return _SSIDseconday; }

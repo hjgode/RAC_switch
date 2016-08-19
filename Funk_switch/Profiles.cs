@@ -15,7 +15,7 @@ namespace Funk_switch
         /// <summary>
         /// registry key where the profile is located
         /// </summary>
-        public string sProfileRekKey
+        public string sProfileRegKey
         {
             get { return _regKey; }
         }

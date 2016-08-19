@@ -174,7 +174,7 @@ namespace Funk_switch
             int iConnectTry = 0;
             //is first profile active?
             //USES instance or regKey name!
-            string currentProfile = _wifi.getCurrentProfile().sProfileRekKey;
+            string currentProfile = _wifi.getCurrentProfile().sProfileRegKey;
             string desiredSSID = _wifi.getCurrentProfile().sSSID;
             OnConnectedMessage("current profile=" + currentProfile);
             //is the preferred profile active?
@@ -191,7 +191,7 @@ namespace Funk_switch
                     OnConnectedMessage("network connected. No profile change.");
                 }
             }
-            else if (_wifi.getCurrentProfile().sProfileRekKey == _profiles[1])
+            else if (_wifi.getCurrentProfile().sProfileRegKey == _profiles[1])
             {
                 //TODO: do not use an INDEX use the names as in App.Config
                 desiredSSID = _wifi.SSIDsecondary;
@@ -278,7 +278,7 @@ namespace Funk_switch
                             break;
                         case 1: //timer
                             OnConnectedMessage("myWorkerThread timer signaled");
-                            OnConnectedMessage("current profile: " + _wifi.getCurrentProfile().sProfileRekKey);
+                            OnConnectedMessage("current profile: " + _wifi.getCurrentProfile().sProfileRegKey);
                             break;
                         case 2: //disconnect
                             if(_bswitchOnDisconnect){

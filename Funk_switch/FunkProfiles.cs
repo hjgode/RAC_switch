@@ -149,7 +149,7 @@ namespace Funk_switch
 
             foreach (Profile p in _profiles)
             {
-                if (p.sProfileRekKey == currentProfileString)
+                if (p.sProfileRegKey == currentProfileString)
                 {
                     return p;
                 }
@@ -159,7 +159,7 @@ namespace Funk_switch
 
         public bool setCurrentProfile(string sInstanceName)
         {
-            if (getCurrentProfile().sProfileRekKey == sInstanceName)
+            if (getCurrentProfile().sProfileRegKey == sInstanceName)
                 return true;
             Logger.WriteLine("enableProfile: " + sInstanceName);
             int iRet = 0;

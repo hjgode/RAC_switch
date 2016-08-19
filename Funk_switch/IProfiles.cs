@@ -14,6 +14,5 @@ namespace Funk_switch
         int readProfiles();
         Profile getCurrentProfile();
         bool setCurrentProfile(string sLabel);
-        
     }
 }
